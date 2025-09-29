@@ -148,24 +148,41 @@ def get_transcription(audio_file, title, client):
             if not selected_model:
                 raise Exception("No suitable OpenAI model found for your API key. Requires gpt-4o, gpt-5-nano, gpt-4-turbo, or gpt-3.5-turbo.")
 
-            messages = [
-                {"role": "system", "content": "Eres un excelente traductor al idioma español."},
-                {"role": "user", "content": f"Transcribe en forma de canción osea en versos el siguiente texto:\n\n{original_text}"}
+            # --- LLAMADA 1: Formatear el texto original ---
+            format_messages = [
+                {"role": "system", "content": "You are a text formatting expert. Your task is to structure a given text into song verses."},
+                {"role": "user", "content": f"Please format the following text into song verses, without altering the original language:\n\n{original_text}"}
             ]
-            response = client.chat.completions.create(
+            format_response = client.chat.completions.create(
                 model=selected_model,
-                messages=messages,
+                messages=format_messages,
                 max_tokens=4096,
                 temperature=0.7,
                 stream=False
             )
-            translated_text = response.choices[0].message.content.strip()
-        except Exception as e:
-            print(f"Error al traducir la transcripción: {e}")
-            return None
+            formatted_original_text = format_response.choices[0].message.content.strip()
 
-        # Devuelve la traducción (o el original si prefieres)
-        return {'original': original_text, 'translated': translated_text}
+            # --- LLAMADA 2: Traducir el texto original ---
+            translate_messages = [
+                {"role": "system", "content": "You are an excellent Spanish translator. Your task is to translate a given text and format it into song verses."},
+                {"role": "user", "content": f"Please translate the following text into Spanish and format it as song verses:\n\n{original_text}"}
+            ]
+            translate_response = client.chat.completions.create(
+                model=selected_model,
+                messages=translate_messages,
+                max_tokens=4096,
+                temperature=0.7,
+                stream=False
+            )
+            translated_text = translate_response.choices[0].message.content.strip()
+
+        except Exception as e:
+            print(f"Error during OpenAI API call: {e}")
+            # Fallback in case of error: return unformatted original and empty translation
+            return {'original': original_text, 'translated': 'Translation failed.'}
+
+        # Devuelve ambas versiones
+        return {'original': formatted_original_text, 'translated': translated_text}
     else:
         return None
 

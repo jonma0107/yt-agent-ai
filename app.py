@@ -53,7 +53,7 @@ def main():
             st.text_area("", result['original_transcription'], height=300)
 
         with col2:
-            st.subheader("Translation")
+            st.subheader("Translation / Spanish only")
             st.text_area("", result['translation'], height=300)
 
 
