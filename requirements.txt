@@ -34,9 +34,9 @@ typing_extensions==4.12.2
 urllib3==2.3.0
 websockets==14.2
 yarl==1.18.3
-yt-dlp==2025.1.26
+yt-dlp==2025.9.26
 gunicorn>=20.0.4
 gevent>=1.4.0
 whitenoise
-celery==5.4.0
+streamlit==1.33.0
 

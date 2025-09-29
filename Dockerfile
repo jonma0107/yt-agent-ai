@@ -14,15 +14,10 @@ COPY ./requirements.txt /requirements.txt
 RUN apk add --update --no-cache \
         postgresql-client \
         build-base \
-        postgresql-dev \
-        gcc \
-        ffmpeg \ 
-        musl-dev \
-        libffi-dev && \
-    python -m venv /py && \
-    /py/bin/pip install --upgrade pip && \
-    /py/bin/pip install -r /requirements.txt && \
-    apk del build-base postgresql-dev
+        ffmpeg
+
+# Instala dependencias necesarias desde el archivo de requisitos
+RUN pip install --no-cache-dir -r /requirements.txt
 
 # Establece el PATH para usar el entorno virtual
 ENV PATH="/py/bin:$PATH"
