@@ -138,7 +138,7 @@ def get_transcription(audio_file, title, client):
             available_models = [model.id for model in client.models.list().data]
             
             # 2. Find a suitable model from a preferred list
-            preferred_models = ['gpt-4o', 'gpt-5-nano', 'gpt-3.5-turbo']
+            preferred_models = ['gpt-4o', 'gpt-5-nano', 'gpt-4-turbo', 'gpt-3.5-turbo']
             selected_model = None
             for model in preferred_models:
                 if model in available_models:
@@ -146,7 +146,7 @@ def get_transcription(audio_file, title, client):
                     break
             
             if not selected_model:
-                raise Exception("No suitable OpenAI model found for your API key. Requires gpt-4o, gpt-5-nano, or gpt-3.5-turbo.")
+                raise Exception("No suitable OpenAI model found for your API key. Requires gpt-4o, gpt-5-nano, gpt-4-turbo, or gpt-3.5-turbo.")
 
             messages = [
                 {"role": "system", "content": "Eres un excelente traductor al idioma español."},

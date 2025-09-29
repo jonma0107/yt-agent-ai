@@ -14,6 +14,7 @@ def main():
     with st.sidebar:
         st.header("Configuration")
         openai_api_key = st.text_input("OpenAI API Key", type="password")
+        st.info("This app uses OpenAI models. Please ensure your API key has access to at least one of the following: `gpt-4o`, `gpt-5-nano`, `gpt-4-turbo`, or `gpt-3.5-turbo`.")
         if st.button("Clear Chat"):
             # Clear the results from the session state
             if 'result' in st.session_state:
