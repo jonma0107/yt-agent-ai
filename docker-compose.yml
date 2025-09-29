@@ -13,26 +13,7 @@ services:
     env_file:
       - .env
     command: sh -c "crond && python manage.py migrate && tail -f /dev/null"
-    depends_on:
-      db:
-        condition: service_healthy
 
-  db:
-    image: postgres:16-alpine
-    container_name: ai_summary_db
-    restart: always
-    volumes:
-      - db-data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    env_file:
-      - .env  # Cargar variables desde .env
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -q -d $DB_NAME -U $DB_USER"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      
   frontend:
     build:
       context: .
@@ -51,4 +32,3 @@ services:
 
 volumes:
   db-data:
-  # staticfiles:  # Volumen para archivos estáticos
