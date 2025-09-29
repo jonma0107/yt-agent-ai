@@ -14,7 +14,8 @@ COPY ./requirements.txt /requirements.txt
 RUN apk add --update --no-cache \
         postgresql-client \
         build-base \
-        ffmpeg
+        ffmpeg \
+        dcron
 
 # Instala dependencias necesarias desde el archivo de requisitos
 RUN pip install --no-cache-dir -r /requirements.txt
@@ -24,6 +25,12 @@ ENV PATH="/py/bin:$PATH"
 
 # Copia el código del backend al contenedor
 COPY . /backend
+
+# Add crontab file and set permissions
+COPY crontab /etc/crontabs/root
+RUN chmod 0644 /etc/crontabs/root
+RUN touch /var/log/cron.log
+RUN chmod +x /backend/cleanup_media.py
 
 # Exponer el puerto por defecto de Django
 EXPOSE 8000

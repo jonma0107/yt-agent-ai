@@ -12,8 +12,7 @@ services:
       - ./media:/backend/media      
     env_file:
       - .env
-    command: >
-      sh -c "python manage.py migrate && tail -f /dev/null"
+    command: sh -c "crond && python manage.py migrate && tail -f /dev/null"
     depends_on:
       db:
         condition: service_healthy

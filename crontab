@@ -1,0 +1,4 @@
+# Execute the cleanup script every day at midnight
+0 0 * * * python /backend/cleanup_media.py >> /var/log/cron.log 2>&1
+
+# An empty line is required at the end of this file for a valid cron file. 
