@@ -19,9 +19,6 @@ environ.Env.read_env()
 # Access the API key from environment variables
 AAI_API_KEY = env('AAI_API_KEY')
 
-# Access the API key from environment variables
-OPENAI_API_KEY = env('OPENAI_API_KEY')
-
 
 def process_youtube_video(yt_link, openai_api_key):
     """
