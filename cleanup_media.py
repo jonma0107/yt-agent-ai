@@ -10,7 +10,7 @@ def setup_django():
     sys.path.append(project_root)
     
     # Set the Django settings module
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ai_summary.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ai_translation.settings')
     
     # Initialize Django
     django.setup()

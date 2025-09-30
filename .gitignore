@@ -127,8 +127,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-ai_summary_env
-ai_summary_env/
+ai_translation_env
+ai_translation_env/
 
 # Spyder project settings
 .spyderproject

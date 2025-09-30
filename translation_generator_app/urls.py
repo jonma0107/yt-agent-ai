@@ -1,7 +1,11 @@
 from django.urls import path
-from .views import views_app
+from .views import TranslationGeneratorView, generate_translation
 
 
 urlpatterns = [
-    path('generate-translation', views_app.generate_translation, name='generate-translation'),
+    # Class-based view (recommended)
+    path('generate-translation/', TranslationGeneratorView.as_view(), name='generate-translation'),
+    
+    # Legacy function-based view (for backwards compatibility)
+    # path('generate-translation', generate_translation, name='generate-translation-legacy'),
 ]

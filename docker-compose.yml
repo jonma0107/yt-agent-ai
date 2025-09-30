@@ -4,7 +4,7 @@ services:
   backend:
     build:
       context: .
-    container_name: ai_summary_backend
+    container_name: ai_translation_backend
     ports:
       - "8000:8000"
     volumes:
@@ -17,7 +17,7 @@ services:
   frontend:
     build:
       context: .
-    container_name: ai_summary_frontend
+    container_name: ai_translation_frontend
     ports:
       - "8501:8501"
     volumes:
