@@ -1,7 +1,6 @@
 # 🎵 IA TRANSLATION - Backend
 
-<img width="1528" height="786" alt="image" src="https://github.com/user-attachments/assets/45dd4c8c-58fb-465f-a91d-0722ab43f834" />
-
+<img width="1528" height="783" alt="image" src="https://github.com/user-attachments/assets/359d58a4-ce58-4628-9142-6477742e1420" />
 
 ## 📖 Descripción
 
