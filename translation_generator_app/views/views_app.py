@@ -1,18 +1,30 @@
-from django.shortcuts import render, redirect
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-from django.conf import settings
+"""
+Class-Based Views for Translation Generator API.
+"""
 import json
-
-from yt_dlp import YoutubeDL
-import os
-import assemblyai as aai
-from ..models import translationPost
+import logging
+from django.http import JsonResponse
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 import environ
-import openai
-from openai import OpenAI
 
-# Load environment variables from .env
+from ..models import translationPost
+from ..services import YouTubeService, TranscriptionService, TranslationService
+from ..serializers import TranslationRequestValidator
+from ..exceptions import (
+    TranslationGeneratorException,
+    YouTubeDownloadException,
+    TranscriptionException,
+    TranslationException,
+    InvalidDataException
+)
+
+# Configure logging
+logger = logging.getLogger(__name__)
+
+# Load environment variables
 env = environ.Env()
 environ.Env.read_env()
 
@@ -20,220 +32,189 @@ environ.Env.read_env()
 AAI_API_KEY = env('AAI_API_KEY')
 
 
-def process_youtube_video(yt_link, openai_api_key):
+class TranslationGeneratorView(View):
     """
-    Downloads, transcribes, and summarizes a YouTube video.
+    Class-based view for processing YouTube videos: download, transcribe, and translate.
+    
+    Endpoint: POST /api/generate-translation
+    
+    Request Body:
+        {
+            "link": "https://youtube.com/watch?v=...",
+            "openai_api_key": "sk-...",
+            "target_language": "es" (optional, default: "es")
+        }
+    
+    Supported languages: es, en, fr, de, it, pt, ru, ja, ko, zh, ar
+    
+    Response:
+        {
+            "content": "translated text...",
+            "title": "video title",
+            "original_transcription": "original text...",
+            "video_file": "/path/to/video.mp4",
+            "audio_file": "/path/to/audio.mp3",
+            "target_language": "es"
+        }
     """
-    # Initialize OpenAI client with user-provided key
-    client = OpenAI(api_key=openai_api_key)
-
-    try:
-        title = yt_title(yt_link)
-        if not title:
-            raise Exception("Could not retrieve YouTube video title.")
-
-        video_file, audio_file = download_video_and_audio(yt_link, title)
-
-        # Check if files were downloaded
-        if not os.path.exists(video_file) or os.path.getsize(video_file) == 0:
-            raise Exception("Failed to download video file or file is empty.")
-        if not os.path.exists(audio_file) or os.path.getsize(audio_file) == 0:
-            raise Exception("Failed to download audio file or file is empty.")
-
-    except Exception as e:
-        raise Exception(f"Error during download: {e}")
-
-    try:
-        transcription_data = get_transcription(audio_file, title, client)
-        if not transcription_data:
-            raise Exception("Failed to get transcript")
-
-        translation_content = transcription_data['translated']
-        original_content = transcription_data['original']
-
-        # Save to database
+    
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        """Disable CSRF for this view."""
+        return super().dispatch(*args, **kwargs)
+    
+    def post(self, request):
+        """
+        Handle POST request to generate translation from YouTube video.
+        
+        Args:
+            request: Django HTTP request
+            
+        Returns:
+            JsonResponse with translation result or error
+        """
+        try:
+            # Parse and validate request data
+            data = self._parse_request_data(request)
+            validated_data = TranslationRequestValidator.validate(data)
+            
+            # Process the video
+            result = self._process_video(
+                yt_link=validated_data['link'],
+                openai_api_key=validated_data['openai_api_key'],
+                target_language=validated_data.get('target_language', 'es')
+            )
+            
+            return JsonResponse({
+                'content': result['translation'],
+                'title': result['title'],
+                'original_transcription': result['original_transcription'],
+                'video_file': result['video_file'],
+                'audio_file': result['audio_file'],
+                'target_language': result.get('target_language', 'es')
+            }, status=200)
+            
+        except InvalidDataException as e:
+            logger.warning(f"Invalid data: {str(e)}")
+            return JsonResponse({'error': str(e)}, status=400)
+        
+        except YouTubeDownloadException as e:
+            logger.error(f"YouTube download error: {str(e)}")
+            return JsonResponse({'error': f"Download failed: {str(e)}"}, status=500)
+        
+        except TranscriptionException as e:
+            logger.error(f"Transcription error: {str(e)}")
+            return JsonResponse({'error': f"Transcription failed: {str(e)}"}, status=500)
+        
+        except TranslationException as e:
+            logger.error(f"Translation error: {str(e)}")
+            return JsonResponse({'error': f"Translation failed: {str(e)}"}, status=500)
+        
+        except TranslationGeneratorException as e:
+            logger.error(f"General error: {str(e)}")
+            return JsonResponse({'error': str(e)}, status=500)
+        
+        except Exception as e:
+            logger.exception(f"Unexpected error: {str(e)}")
+            return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
+    
+    def get(self, request):
+        """Handle GET request - return method not allowed."""
+        return JsonResponse({'error': 'Method not allowed. Use POST.'}, status=405)
+    
+    def _parse_request_data(self, request) -> dict:
+        """
+        Parse JSON data from request body.
+        
+        Args:
+            request: Django HTTP request
+            
+        Returns:
+            Parsed JSON data
+            
+        Raises:
+            InvalidDataException: If JSON parsing fails
+        """
+        try:
+            return json.loads(request.body)
+        except json.JSONDecodeError:
+            raise InvalidDataException("Invalid JSON data")
+    
+    def _process_video(self, yt_link: str, openai_api_key: str, target_language: str = 'es') -> dict:
+        """
+        Process YouTube video: download, transcribe, and translate.
+        
+        Args:
+            yt_link: YouTube video URL
+            openai_api_key: OpenAI API key for translation
+            target_language: Target language code for translation (default: 'es')
+            
+        Returns:
+            Dictionary with processing results
+            
+        Raises:
+            YouTubeDownloadException: If download fails
+            TranscriptionException: If transcription fails
+            TranslationException: If translation fails
+        """
+        # Initialize services
+        youtube_service = YouTubeService()
+        transcription_service = TranscriptionService(api_key=AAI_API_KEY)
+        translation_service = TranslationService(api_key=openai_api_key)
+        
+        # Step 1: Get video title
+        logger.info(f"Fetching title for: {yt_link}")
+        title = youtube_service.get_title(yt_link)
+        logger.info(f"Video title: {title}")
+        
+        # Step 2: Download video and audio
+        logger.info(f"Downloading video and audio for: {title}")
+        video_file, audio_file = youtube_service.download_video_and_audio(yt_link, title)
+        logger.info(f"Downloaded - Video: {video_file}, Audio: {audio_file}")
+        
+        # Step 3: Transcribe audio
+        logger.info(f"Transcribing audio: {audio_file}")
+        original_text = transcription_service.transcribe_audio(audio_file, title)
+        logger.info(f"Transcription complete, length: {len(original_text)} chars")
+        
+        # Step 4: Format and translate
+        logger.info(f"Processing translation and formatting (target language: {target_language})")
+        processed_text = translation_service.process_transcription(original_text, target_language=target_language)
+        logger.info("Translation complete")
+        
+        # Step 5: Save to database
         translation = translationPost.objects.create(
             youtube_title=title,
             youtube_link=yt_link,
-            generated_content=translation_content
+            generated_content=processed_text['translated']
         )
         translation.save()
-
-        # The audio file is no longer deleted to allow for download.
-        # delete_audio_file(audio_file)
-
+        logger.info(f"Saved translation to database, ID: {translation.id}")
+        
+        # Prepare transcript file path
+        safe_title = "".join(c for c in title if c.isalnum() or c in (' ', '_', '-')).rstrip()
+        transcription_file = settings.MEDIA_ROOT / f"{safe_title}.txt"
+        
         return {
             "title": title,
-            "translation": translation_content,
-            "original_transcription": original_content,
+            "translation": processed_text['translated'],
+            "original_transcription": processed_text['original'],
             "video_file": video_file,
             "audio_file": audio_file,
-            "transcription_file": settings.MEDIA_ROOT / f"{''.join(c for c in title if c.isalnum() or c in (' ', '_', '-')).rstrip()}.txt"
+            "transcription_file": str(transcription_file),
+            "target_language": target_language
         }
-    except Exception as e:
-        raise Exception(f"Error during transcription: {e}")
 
 
-def delete_audio_file(filepath):
-    """ Delete the audio file if it exists. """
-    try:
-        if os.path.exists(filepath):
-            os.remove(filepath)
-            print(f"File deleted: {filepath}")
-        else:
-            print(f"File not found: {filepath}")
-    except Exception as e:
-        print(f"Error when deleting file: {e}")
-
-def download_video_and_audio(link, title):
-    safe_title = "".join(c for c in title if c.isalnum() or c in (' ', '_', '-')).rstrip()
-    video_path = settings.MEDIA_ROOT / f"{safe_title}_video"
-    audio_path = settings.MEDIA_ROOT / f"{safe_title}_audio"
-
-    # Descargar video .mp4
-    video_opts = {
-        'format': 'mp4',
-        'outtmpl': str(video_path) + '.mp4',
-    }
-    with YoutubeDL(video_opts) as ydl:
-        ydl.download([link])
-    video_file = str(video_path) + '.mp4'
-
-    # Descargar audio .mp3
-    audio_opts = {
-        'format': 'bestaudio/best',
-        'outtmpl': str(audio_path),  # sin extensión, yt-dlp la añade
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
-    }
-    with YoutubeDL(audio_opts) as ydl:
-        ydl.download([link])
-    audio_file = str(audio_path) + '.mp3'
-
-    return video_file, audio_file
-
-def get_transcription(audio_file, title, client):
-    aai.settings.api_key = AAI_API_KEY
-    transcriber = aai.Transcriber()
-    transcript = transcriber.transcribe(audio_file)
-
-    if transcript and hasattr(transcript, 'text') and transcript.text:
-        original_text = transcript.text
-        # Guardar la transcripción original en un archivo .txt
-        safe_title = "".join(c for c in title if c.isalnum() or c in (' ', '_', '-')).rstrip()
-        transcript_file = settings.MEDIA_ROOT / f"{safe_title}.txt"
-        with open(transcript_file, "w", encoding="utf-8") as f:
-            f.write(original_text)
-
-        # (Opcional) Si quieres seguir devolviendo la traducción, puedes traducir aquí:
-        
-        try:
-            # 1. Get available models
-            available_models = [model.id for model in client.models.list().data]
-            
-            # 2. Find a suitable model from a preferred list
-            preferred_models = ['gpt-4o', 'gpt-5-nano', 'gpt-4-turbo', 'gpt-3.5-turbo']
-            selected_model = None
-            for model in preferred_models:
-                if model in available_models:
-                    selected_model = model
-                    break
-            
-            if not selected_model:
-                raise Exception("No suitable OpenAI model found for your API key. Requires gpt-4o, gpt-5-nano, gpt-4-turbo, or gpt-3.5-turbo.")
-
-            # --- LLAMADA 1: Formatear el texto original ---
-            format_messages = [
-                {"role": "system", "content": "You are a text formatting expert. Your task is to structure a given text into song verses."},
-                {"role": "user", "content": f"Please format the following text into song verses, without altering the original language:\n\n{original_text}"}
-            ]
-            format_response = client.chat.completions.create(
-                model=selected_model,
-                messages=format_messages,
-                max_tokens=4096,
-                temperature=0.7,
-                stream=False
-            )
-            formatted_original_text = format_response.choices[0].message.content.strip()
-
-            # --- LLAMADA 2: Traducir el texto original ---
-            translate_messages = [
-                {"role": "system", "content": "You are an excellent Spanish translator. Your task is to translate a given text and format it into song verses."},
-                {"role": "user", "content": f"Please translate the following text into Spanish and format it as song verses:\n\n{original_text}"}
-            ]
-            translate_response = client.chat.completions.create(
-                model=selected_model,
-                messages=translate_messages,
-                max_tokens=4096,
-                temperature=0.7,
-                stream=False
-            )
-            translated_text = translate_response.choices[0].message.content.strip()
-
-        except Exception as e:
-            print(f"Error during OpenAI API call: {e}")
-            # Fallback in case of error: return unformatted original and empty translation
-            return {'original': original_text, 'translated': 'Translation failed.'}
-
-        # Devuelve ambas versiones
-        return {'original': formatted_original_text, 'translated': translated_text}
-    else:
-        return None
-
+# Legacy function-based view support (if needed for backwards compatibility)
 @csrf_exempt
 def generate_translation(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            yt_link = data['link']
-            openai_api_key = data['openai_api_key'] # Assuming key is passed in request
-        except (KeyError, json.JSONDecodeError):
-            return JsonResponse({'error': 'Invalid data sent'}, status=400)
-
-        try:
-            result = process_youtube_video(yt_link, openai_api_key)
-            return JsonResponse({'content': result['translation']})
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
-
-    else:
-        return JsonResponse({'error': 'Invalid request method'}, status=405)
-
-def yt_title(link):
-    ydl_opts = {}
-    with YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(link, download=False)  # Only extracts information without downloading
-        title = info.get('title', None)
-    return title
-
-def download_audio(link):
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'outtmpl': os.path.join(settings.MEDIA_ROOT, '%(title)s.%(ext)s'),
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
-    }
-
-    with YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(link, download=True)
-        file_path = ydl.prepare_filename(info)
-        base, ext = os.path.splitext(file_path)
-        new_file = f"{base}.mp3"
-
-    return new_file
-
-# DeepSeek client configuration
-# client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY"), base_url="https://api.openai.com/v1")
-
-# OpenAI client configuration
-# client = openai.OpenAI(
-#     api_key=os.environ.get("OPENAI_API_KEY"),
-#     base_url="https://api.openai.com/v1",
-# )
+    """
+    Legacy function-based view wrapper for TranslationGeneratorView.
+    
+    This is kept for backwards compatibility.
+    Use TranslationGeneratorView.as_view() instead.
+    """
+    view = TranslationGeneratorView.as_view()
+    return view(request)
 
