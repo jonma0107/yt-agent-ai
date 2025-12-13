@@ -8,7 +8,7 @@ Este documento profundiza en los componentes auxiliares del sistema, la estrateg
 **Propósito:** Mantener la higiene del servidor eliminando archivos temporales antiguos.
 **Funcionamiento:**
 - Escanea el directorio `media/`.
-- Identifica archivos (`.mp4`, `.mp3`, `.txt`) que tienen más de **1 hora** de antigüedad.
+- Identifica archivos (`.mp4`, `.mp3`, `.txt`) que tienen más de **5 minutos** de antigüedad.
 - Los elimina para liberar espacio en disco.
 **Contexto:** Dado que la aplicación descarga video y audio para cada solicitud, el disco del servidor se llenaría rápidamente sin este script. Es esencial para la **sostenibilidad operativa** de la app.
 
@@ -16,9 +16,9 @@ Este documento profundiza en los componentes auxiliares del sistema, la estrateg
 **Propósito:** Automatizar la ejecución periódica de tareas de mantenimiento.
 **Contenido:**
 ```cron
-*/30 * * * * python /backend/cleanup_media.py >> /var/log/cron.log 2>&1
+*/5 * * * * python /backend/cleanup_media.py >> /var/log/cron.log 2>&1
 ```
-**Explicación:** Configura al sistema (dentro del contenedor Docker) para ejecutar el script `cleanup_media.py` cada **30 minutos**. Esto garantiza que la limpieza sea automática y transparente, previniendo el desbordamiento de almacenamiento.
+**Explicación:** Configura al sistema (dentro del contenedor Docker) para ejecutar el script `cleanup_media.py` cada **5 minutos**. Esto garantiza que la limpieza sea automática y transparente, previniendo el desbordamiento de almacenamiento.
 
 ### `django_setup.py`
 **Propósito:** Permitir que scripts externos (como `app.py` de Streamlit) usen el ORM y modelos de Django.
