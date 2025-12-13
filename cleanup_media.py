@@ -22,8 +22,8 @@ def cleanup_old_files():
     setup_django()
     from django.conf import settings
 
-    # Age limit in seconds (e.g., 24 hours = 86400 seconds)
-    AGE_LIMIT_SECONDS = 86400
+    # Age limit in seconds (1 hour = 3600 seconds)
+    AGE_LIMIT_SECONDS = 3600
     
     media_dir = settings.MEDIA_ROOT
     if not os.path.isdir(media_dir):
