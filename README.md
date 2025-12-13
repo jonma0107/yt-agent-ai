@@ -1,218 +1,116 @@
-# 🎵 IA TRANSLATION - Backend
+# 🎵 YT-AGENT-AI
 
 <img width="1528" height="783" alt="image" src="https://github.com/user-attachments/assets/359d58a4-ce58-4628-9142-6477742e1420" />
 
-## 📖 Descripción
+## 📖 Descripción General
 
-**IA TRANSLATION** es una aplicación web avanzada que permite traducir y obtener las letras de tus canciones favoritas de YouTube. Utiliza inteligencia artificial para transcribir, formatear y traducir automáticamente las letras de canciones a múltiples idiomas.
+**YT-AGENT-AI** es una aplicación web avanzada que permite traducir y obtener las letras de tus canciones favoritas de YouTube. Utiliza inteligencia artificial para transcribir, formatear y traducir automáticamente las letras de canciones a múltiples idiomas.
 
 ### ✨ Características Principales
 
-- 🎥 **Descarga de YouTube**: Descarga video y audio de YouTube
-- 🎙️ **Transcripción con IA**: Usa AssemblyAI para transcribir audio
-- 🌍 **Traducción Multiidioma**: Soporta 11 idiomas diferentes
-- 🤖 **Detección Automática**: Detecta el idioma del audio automáticamente
-- 💡 **Traducción Inteligente**: Solo traduce si es necesario
-- 🎨 **Interfaz Streamlit**: UI moderna e intuitiva
-- 📊 **API REST**: Endpoint completo para integraciones
-- 🏗️ **Arquitectura Limpia**: Clean Architecture + SOLID principles
+- 🎥 **YouTube Agent**: Descarga video y audio de alta calidad.
+- 🎙️ **Transcripción con IA**: Transcripción de voz a texto de alta precisión usando AssemblyAI.
+- 🌍 **Soporte Multiidioma**: Soporta 11 idiomas con detección automática.
+- 🎨 **Interfaz Moderna**: Interfaz Streamlit para una interacción sencilla.
+- 🏗️ **Clean Architecture**: Construido con separación de responsabilidades y principios SOLID.
+- 🐳 **Dockerized**: Fácil despliegue y desarrollo local.
+
+---
+
+## 🚀 Inicio Rápido
+
+La forma más fácil de ejecutar la aplicación es usando **Docker Compose**.
+
+### Prerrequisitos
+
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+- OpenAI API Key
+- AssemblyAI API Key
+
+### Instalación
+
+1.  **Clonar el repositorio:**
+
+    ```bash
+    git clone https://github.com/jonma0107/yt-agent-ai.git
+    cd Backend
+    ```
+
+2.  **Configuración del Entorno:**
+
+    Crea un archivo `.env` en el directorio raíz:
+
+    ```bash
+    cp .env.example .env
+    ```
+
+    Actualiza `.env` con tus credenciales:
+    ```ini
+    AAI_API_KEY=tu_api_key_assemblyai
+    SECRET_KEY=tu_secret_key_django
+    DEBUG=True
+    DB_NAME=postgres
+    DB_USER=postgres
+    DB_PASS=postgres
+    DB_HOST=db
+    ```
+
+3.  **Ejecutar con Docker Compose:**
+
+    ```bash
+    docker-compose up --build
+    ```
+
+    Este comando:
+    *   Iniciará la base de datos PostgreSQL.
+    *   Construirá e iniciará el servicio Backend (Django).
+    *   Construirá e iniciará el servicio Frontend (Streamlit).
+
+4.  **Acceder a la Aplicación:**
+
+    *   **Frontend (Streamlit)**: [http://localhost:8501](http://localhost:8501)
+    *   **Backend API**: [http://localhost:8000](http://localhost:8000)
+
+---
+
+## 🏗️ Arquitectura
+
+El proyecto sigue un patrón de **Clean Architecture**. La lógica central está aislada en el directorio `translation_generator_app/services`.
+
+Para profundizar en la estructura del código, flujo de ejecución y servicios, por favor lee:
+
+👉 **[Arquitectura Técnica](./docs/ARCHITECTURE.md)**
 
 ---
 
 ## 🌍 Idiomas Soportados
 
 | Idioma | Código | Idioma | Código |
-|--------|--------|--------|--------|
-| 🇪🇸 Español | `es` | 🇵🇹 Português | `pt` |
-| 🇬🇧 English | `en` | 🇷🇺 Русский | `ru` |
-| 🇫🇷 Français | `fr` | 🇯🇵 日本語 | `ja` |
-| 🇩🇪 Deutsch | `de` | 🇰🇷 한국어 | `ko` |
-| 🇮🇹 Italiano | `it` | 🇨🇳 中文 | `zh` |
-| - | - | 🇸🇦 العربية | `ar` |
+|----------|------|----------|------|
+| 🇪🇸 Español | `es` | 🇵🇹 Portugués | `pt` |
+| 🇬🇧 Inglés | `en` | 🇷🇺 Ruso | `ru` |
+| 🇫🇷 Francés | `fr` | 🇯🇵 Japonés | `ja` |
+| 🇩🇪 Alemán | `de` | 🇰🇷 Coreano | `ko` |
+| 🇮🇹 Italiano | `it` | 🇨🇳 Chino | `zh` |
+| - | - | 🇸🇦 Árabe | `ar` |
 
 ---
 
-## 🚀 Inicio Rápido
+## Despliegue
 
-### Requisitos Previos
+La aplicación está contenerizada y lista para despliegue.
 
-- Python 3.8+
-- PostgreSQL
-- AssemblyAI API Key
-- OpenAI API Key
-
-### Instalación
-
-```bash
-# Clonar el repositorio
-git clone <repository-url>
-cd Backend
-
-# Crear entorno virtual
-python -m venv venv
-source venv/bin/activate  # En Windows: venv\Scripts\activate
-
-# Instalar dependencias
-pip install -r requirements.txt
-
-# Configurar variables de entorno
-cp .env.example .env
-# Editar .env con tus API keys
-
-# Ejecutar migraciones
-python manage.py migrate
-
-# Iniciar servidor Django
-python manage.py runserver
-
-# En otra terminal, iniciar Streamlit
-streamlit run app.py
-```
+*   **Imagen Docker**: Construida automáticamente vía GitHub Actions.
+*   **Producción**: Puede desplegarse en plataformas como Render, Railway, o AWS ECS usando el `Dockerfile`.
+*   **Despliegue del Frontend**: Para desplegar la UI, sobrescribe el comando de inicio del contenedor con `streamlit run app.py`.
 
 ---
 
-## 📚 Documentación Completa
-
-Toda la documentación del proyecto está organizada en la carpeta [`docs/`](./docs/):
-
-### 📋 Índice de Documentación
-
-1. **[ARCHITECTURE.md](./docs/ARCHITECTURE.md)** - Arquitectura técnica completa
-2. **[REFACTORING_COMPLETE.md](./docs/REFACTORING_COMPLETE.md)** - Resumen de refactorización
-3. **[STREAMLIT_INTEGRATION.md](./docs/STREAMLIT_INTEGRATION.md)** - Integración Streamlit
-4. **[MULTILANGUAGE_TRANSLATION.md](./docs/MULTILANGUAGE_TRANSLATION.md)** - Guía multiidioma
-5. **[SETTINGS_CLEANUP_COMPLETE.md](./docs/SETTINGS_CLEANUP_COMPLETE.md)** - Configuración Django
-6. **[DOCUMENTATION_UPDATE.md](./docs/DOCUMENTATION_UPDATE.md)** - Registro de cambios
-
-📌 **Ver el [README completo de documentación](./docs/README.md)** para guías detalladas y referencias.
-
----
-
-## 🔌 API Reference
-
-### Endpoint Principal
-
-```http
-POST /api/generate-translation/
-Content-Type: application/json
-
-{
-    "link": "https://youtube.com/watch?v=...",
-    "openai_api_key": "sk-...",
-    "target_language": "fr"  // Opcional, default: "es"
-}
-```
-
-### Respuesta
-
-```json
-{
-    "content": "Texto traducido...",
-    "title": "Título del video",
-    "original_transcription": "Texto original formateado...",
-    "video_file": "/path/to/video.mp4",
-    "audio_file": "/path/to/audio.mp3",
-    "target_language": "fr"
-}
-```
-
----
-
-## 🏗️ Arquitectura
-
-```
-Backend/
-├── ai_translation/          # Configuración Django
-├── translation_generator_app/
-│   ├── services/           # Lógica de negocio
-│   │   ├── youtube_service.py
-│   │   ├── transcription_service.py
-│   │   └── translation_service.py
-│   ├── serializers/        # Validadores
-│   ├── views/             # Vistas CBV
-│   └── exceptions.py      # Excepciones personalizadas
-├── docs/                  # 📚 Documentación completa
-├── media/                 # Archivos generados
-├── app.py                # Interfaz Streamlit
-└── manage.py             # Django CLI
-```
-
-### Servicios Principales
-
-- **YouTubeService**: Descarga de videos de YouTube
-- **TranscriptionService**: Transcripción con AssemblyAI  
-- **TranslationService**: Traducción y formateo con OpenAI
-
----
-
-## 🛠️ Tecnologías
-
-- **Backend**: Django 4.1, Django REST Framework
-- **Frontend**: Streamlit
-- **Base de Datos**: PostgreSQL
-- **IA/ML**: 
-  - AssemblyAI (transcripción)
-  - OpenAI GPT-4 (traducción)
-- **Descarga**: yt-dlp
-- **Servidor**: Gunicorn + Whitenoise
-
----
-
-## 🔐 Variables de Entorno
-
-```bash
-# .env
-AAI_API_KEY=your_assemblyai_api_key
-SECRET_KEY=your_django_secret_key
-DEBUG=True
-DB_NAME=your_db_name
-DB_USER=your_db_user
-DB_PASS=your_db_password
-DB_HOST=localhost
-```
-
----
-
-## 📊 Métricas del Proyecto
-
-| Métrica | Valor |
-|---------|-------|
-| **Idiomas Soportados** | 11 🌍 |
-| **Servicios** | 3 |
-| **Excepciones Personalizadas** | 5 |
-| **Arquitectura** | Clean Architecture + SOLID |
-| **Type Hints** | 100% |
-| **Logging** | 100% |
-| **Documentación** | 64KB |
-
----
-
-## 🤝 Contribuir
-
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
----
-
-## 📝 Licencia
+## Licencia
 
 Este proyecto está bajo la Licencia MIT.
 
 ---
 
-## 📞 Soporte
-
-Para soporte y preguntas:
-- 📚 Consulta la [documentación completa](./docs/README.md)
-- 🐛 Reporta bugs en Issues
-- 💡 Sugiere features en Discussions
-
----
-
-**Desarrollado con ❤️ usando Clean Architecture y SOLID principles**
-
-*Última actualización: Septiembre 30, 2025*
-
+**Desarrollado con ❤️ usando Clean Architecture**
