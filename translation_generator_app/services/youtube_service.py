@@ -13,6 +13,20 @@ from ..exceptions import YouTubeDownloadException
 class YouTubeService:
     """Service for handling YouTube video operations."""
     
+    # Common options to avoid 403 Forbidden errors
+    _COMMON_OPTS = {
+        'quiet': True,
+        'nocheckcertificate': True,
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['android', 'ios']
+            }
+        },
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        }
+    }
+
     @staticmethod
     def get_title(link: str) -> str:
         """
@@ -28,7 +42,7 @@ class YouTubeService:
             YouTubeDownloadException: If title extraction fails
         """
         try:
-            ydl_opts = {'quiet': True}
+            ydl_opts = YouTubeService._COMMON_OPTS.copy()
             with YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(link, download=False)
                 title = info.get('title', None)
@@ -74,17 +88,19 @@ class YouTubeService:
             audio_path = settings.MEDIA_ROOT / f"{safe_title}_audio"
             
             # Download video as .mp4
-            video_opts = {
-                'format': 'mp4',
+            video_opts = YouTubeService._COMMON_OPTS.copy()
+            video_opts.update({
+                'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best', # Ensure mp4
                 'outtmpl': str(video_path) + '.mp4',
-                'quiet': True,
-            }
+            })
+            
             with YoutubeDL(video_opts) as ydl:
                 ydl.download([link])
             video_file = str(video_path) + '.mp4'
             
             # Download audio as .mp3
-            audio_opts = {
+            audio_opts = YouTubeService._COMMON_OPTS.copy()
+            audio_opts.update({
                 'format': 'bestaudio/best',
                 'outtmpl': str(audio_path),
                 'postprocessors': [{
@@ -92,8 +108,8 @@ class YouTubeService:
                     'preferredcodec': 'mp3',
                     'preferredquality': '192',
                 }],
-                'quiet': True,
-            }
+            })
+
             with YoutubeDL(audio_opts) as ydl:
                 ydl.download([link])
             audio_file = str(audio_path) + '.mp3'
@@ -126,7 +142,8 @@ class YouTubeService:
             YouTubeDownloadException: If download fails
         """
         try:
-            ydl_opts = {
+            ydl_opts = YouTubeService._COMMON_OPTS.copy()
+            ydl_opts.update({
                 'format': 'bestaudio/best',
                 'outtmpl': os.path.join(settings.MEDIA_ROOT, '%(title)s.%(ext)s'),
                 'postprocessors': [{
@@ -134,8 +151,7 @@ class YouTubeService:
                     'preferredcodec': 'mp3',
                     'preferredquality': '192',
                 }],
-                'quiet': True,
-            }
+            })
             
             with YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(link, download=True)
