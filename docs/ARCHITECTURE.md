@@ -29,7 +29,7 @@ graph TD
     
     subgraph "Capa de Entrada"
         EntryPoint{Punto de Entrada}
-        Streamlit[Streamlit UI (app.py)]
+        Streamlit["Streamlit UI (app.py)"]
         API[Vista API Django]
     end
     
@@ -42,12 +42,12 @@ graph TD
     subgraph "Capa de Servicio (Lógica de Negocio)"
         Orchestrator[Orquestación de Servicios]
         YT[YouTubeService]
-        AI_Trans[TranscriptionService (AssemblyAI)]
-        AI_Transl[TranslationService (OpenAI)]
+        AI_Trans[TranscriptionService - AssemblyAI]
+        AI_Transl[TranslationService - OpenAI]
     end
     
     Orchestrator --> YT
-    YT --> Files[Archivos Media (MP4/MP3)]
+    YT --> Files[Archivos Media MP4/MP3]
     
     Orchestrator --> AI_Trans
     AI_Trans --> Text[Transcripción Cruda]

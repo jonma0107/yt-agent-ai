@@ -82,6 +82,9 @@ Para profundizar en la estructura del código, flujo de ejecución y servicios, 
 
 👉 **[Arquitectura Técnica](./docs/ARCHITECTURE.md)**
 
+👉 **[Componentes Clave y Decisiones Técnicas](./docs/KEY_COMPONENTS_EXPLAINED.md)**
+
+
 ---
 
 ## 🌍 Idiomas Soportados
