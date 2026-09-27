@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>YT-AGENT-AI — Documentación del Proyecto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Source+Sans+3:wght@400;600;700&family=Source+Code+Pro:wght@450;600&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --blue: #3498db;
+  --blue-dark: #1f6fad;
+  --green: #3ab37e;
+  --orange: #f58d6d;
+  --ink: #353b4e;
+  --muted: #5c6578;
+  --line: #e4e7ec;
+  --paper: #f7f8fa;
+  --card: #ffffff;
+  --navy: #353b4e;
+  --teal: #3498db;
+  --sage: #e4f6ee;
+  --ok: #2f8f62;
+  --ok-bg: #e4f6ee;
+  --warn: #c05621;
+  --warn-bg: #ffeee8;
+  --err: #b91c1c;
+  --err-bg: #fee2e2;
+  --black: #0b0b0b;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Source Sans 3", "Segoe UI", sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+}
+.brand-bar {
+  height: 6px;
+  background: linear-gradient(to right, var(--blue) 0 33.3%, var(--green) 33.3% 66.6%, var(--orange) 66.6% 100%);
+}
+.masthead {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 32px;
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+}
+.masthead .logo {
+  font-family: Fraunces, Georgia, serif;
+  font-weight: 600;
+  font-size: 1.4rem;
+  color: var(--navy);
+}
+.masthead .meta { color: var(--muted); font-size: 0.9rem; }
+.shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 24px 0;
+  gap: 24px;
+}
+nav {
+  position: sticky;
+  top: 16px;
+  align-self: start;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+}
+nav .brand { font-weight: 700; color: var(--navy); }
+nav .sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 12px; }
+nav a {
+  display: block;
+  color: var(--ink);
+  text-decoration: none;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 0.92rem;
+}
+nav a:hover { background: var(--paper); }
+nav a.active { background: var(--sage); color: var(--ok); font-weight: 600; }
+main { min-width: 0; }
+section.hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  padding: 40px 36px;
+  color: #fff;
+  background: linear-gradient(145deg, #353b4e 0%, #1f6fad 58%, #3ab37e 100%);
+}
+section.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--orange);
+  opacity: 0.22;
+  pointer-events: none;
+}
+section.hero .kicker {
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  font-weight: 700;
+  opacity: 0.9;
+}
+section.hero h1 {
+  font-family: Fraunces, Georgia, serif;
+  font-weight: 600;
+  font-size: 2.2rem;
+  margin: 8px 0 12px;
+}
+section.hero p { max-width: 640px; }
+section.hero .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; position: relative; z-index: 1; }
+section.hero .pill {
+  font-family: "Source Code Pro", ui-monospace, monospace;
+  font-size: 0.82rem;
+  background: rgba(255,255,255,0.16);
+  border: 1px solid rgba(255,255,255,0.25);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+section.hero .pill.prod { background: var(--orange); border-color: var(--orange); font-weight: 600; }
+.hero code {
+  font-family: "Source Code Pro", ui-monospace, monospace;
+  font-size: 0.86em;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffd9a3;
+  padding: 1px 6px;
+  border-radius: 5px;
+}
+.hero strong { color: #ffffff; }
+section.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 28px 32px;
+  margin: 24px 0;
+}
+h2 {
+  font-family: Fraunces, Georgia, serif;
+  color: var(--blue-dark);
+  font-size: 1.5rem;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 8px;
+}
+h3 { color: var(--navy); }
+h4 { color: var(--blue-dark); margin-bottom: 4px; }
+p code, li code, td code {
+  font-family: "Source Code Pro", ui-monospace, monospace;
+  font-size: 0.86em;
+  background: #eef2ff;
+  padding: 1px 6px;
+  border-radius: 5px;
+}
+.callout {
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--blue);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 16px 0;
+  background: var(--paper);
+}
+.callout .lbl { font-weight: 700; display: block; margin-bottom: 4px; }
+.callout.c-sage { border-left-color: var(--green); background: var(--ok-bg); }
+.callout.c-warn { border-left-color: var(--warn); background: var(--warn-bg); }
+.callout.c-ok { border-left-color: var(--ok); background: var(--ok-bg); }
+.callout.c-info { border-left-color: var(--blue); }
+.steps { display: flex; flex-direction: column; gap: 12px; }
+.step { display: flex; gap: 12px; align-items: flex-start; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; }
+.step .n {
+  flex: 0 0 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--blue-dark);
+  color: #fff;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.94rem; }
+th { background: var(--blue-dark); color: #fff; text-align: left; padding: 8px 12px; }
+td { border: 1px solid var(--line); padding: 8px 12px; }
+tr:nth-child(even) td { background: var(--paper); }
+.code {
+  background: #0f172a;
+  color: #e7efe9;
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin: 12px 0;
+  overflow-x: auto;
+  font-family: "Source Code Pro", ui-monospace, monospace;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+.code .lbl { display: block; color: #9bb8b0; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.08em; margin-bottom: 8px; }
+.code pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
+.endpoint {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin: 12px 0;
+  font-family: "Source Code Pro", ui-monospace, monospace;
+}
+.endpoint .verb {
+  background: var(--green);
+  color: #fff;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+.groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.group { border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; background: var(--paper); }
+.group .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.group .chip {
+  font-family: "Source Code Pro", ui-monospace, monospace;
+  font-size: 0.8rem;
+  background: #eef2ff;
+  border: 1px solid var(--line);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+.checklist ol { padding-left: 20px; }
+.checklist li { margin: 4px 0; }
+footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+  padding: 24px;
+  border-top: 1px solid var(--line);
+  margin-top: 24px;
+}
+@media print {
+  @page { size: A4; margin: 12mm 12mm 16mm; }
+  body { background: #fff; }
+  nav { display: none; }
+  .shell { grid-template-columns: 1fr; padding: 16px 8px 0; max-width: none; }
+  .masthead { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .brand-bar, .hero, .pill, .http, .n, th, .verb {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .hero { break-inside: avoid; }
+  .callout, .step, .group, .err, table, .code { break-inside: avoid; }
+  a { color: inherit; }
+}
+</style>
+</head>
+<body>
+<div class="brand-bar"></div>
+<header class="masthead">
+  <div class="logo">YT-AGENT-AI</div>
+  <div class="meta">Documentación del Proyecto · Backend · rama main</div>
+</header>
+<div class="shell">
+  <nav id="toc">
+    <div class="brand">YT-AGENT-AI</div>
+    <div class="sub">Reporte de Contenido con IA</div>
+    <a href="#descripcion" class="active">Descripción</a>
+    <a href="#flujo">Flujo de ejecución</a>
+    <a href="#stack">Stack tecnológico</a>
+    <a href="#estructura">Estructura</a>
+    <a href="#componentes">Componentes</a>
+    <a href="#api">API REST</a>
+    <a href="#cambios">Cambios recientes</a>
+    <a href="#entorno">Entorno</a>
+    <a href="#despliegue">Despliegue</a>
+    <a href="#mantenimiento">Mantenimiento</a>
+    <a href="#faq">Preguntas frecuentes</a>
+    <a href="#checklist">Checklist</a>
+  </nav>
+  <main>
+    <section class="hero">
+      <span class="kicker">Documentación interna</span>
+      <h1>YT-AGENT-AI — Reporte de Contenido</h1>
+      <p>App web que analiza videos de YouTube: transcribe el audio con <strong>AssemblyAI</strong> y genera un <strong>reporte de contenido estructurado</strong> con <strong>Google Gemini</strong>. Interfaz <code>Streamlit</code> + API REST <code>Django</code>.</p>
+      <div class="pills">
+        <span class="pill prod">gemini-3.5-flash-lite</span>
+        <span class="pill">POST /api/generate-report/</span>
+        <span class="pill">Clean Architecture</span>
+        <span class="pill">Docker</span>
+      </div>
+    </section>
+
+    <section class="card" id="descripcion">
+      <h2>Descripción general</h2>
+      <p><strong>YT-AGENT-AI</strong> nació para traducir letras de canciones y evolucionó a un nuevo propósito: al ingresar una URL de YouTube, descarga el audio, lo transcribe y produce un reporte de contenido con 5 secciones (temas, argumento, opiniones, datos clave y conclusión).</p>
+      <div class="callout c-sage"><span class="lbl">Propósito actual</span>URL de YouTube → descarga de audio → transcripción (AssemblyAI) → reporte estructurado (Gemini) → persistencia en PostgreSQL → Streamlit / REST.</div>
+      <div class="callout c-info"><span class="lbl">API Keys</span>La clave de AssemblyAI (<code>AAI_API_KEY</code>) vive en el servidor vía <code>.env</code>. La clave de Gemini la provee cada usuario en el sidebar de Streamlit o en el payload REST (<code>gemini_api_key</code>); no va en el <code>.env</code>.</div>
+    </section>
+
+    <section class="card" id="flujo">
+      <h2>Flujo de ejecución</h2>
+      <div class="steps">
+        <div class="step"><span class="n">1</span><div><strong>Entrada.</strong> Usuario provee URL de YouTube y su API Key de Gemini.</div></div>
+        <div class="step"><span class="n">2</span><div><strong>Descarga.</strong> <code>YouTubeService</code> obtiene título y descarga video/audio a <code>media/</code> con <code>yt-dlp</code>.</div></div>
+        <div class="step"><span class="n">3</span><div><strong>Transcripción.</strong> <code>TranscriptionService</code> envía el audio a AssemblyAI y guarda el texto.</div></div>
+        <div class="step"><span class="n">4</span><div><strong>Análisis.</strong> <code>AnalysisService</code> fragmenta la transcripción (chunks de 8000, máx. 30000) y genera el reporte con Gemini, con fallback entre modelos por cuota.</div></div>
+        <div class="step"><span class="n">5</span><div><strong>Persistencia.</strong> Resultado guardado en <code>translationPost</code> vía Django ORM.</div></div>
+        <div class="step"><span class="n">6</span><div><strong>Visualización.</strong> Reporte en Streamlit con botón de descarga en PDF, más video/audio.</div></div>
+      </div>
+    </section>
+
+    <section class="card" id="stack">
+      <h2>Stack tecnológico</h2>
+      <table>
+        <tr><th>Componente</th><th>Tecnología</th><th>Versión</th></tr>
+        <tr><td>Backend</td><td>Django</td><td>4.1</td></tr>
+        <tr><td>Frontend</td><td>Streamlit</td><td>1.33.0</td></tr>
+        <tr><td>Transcripción</td><td>AssemblyAI</td><td>0.36.0</td></tr>
+        <tr><td>IA</td><td>Google Gemini</td><td>gemini-3.5-flash-lite</td></tr>
+        <tr><td>Descarga</td><td>yt-dlp</td><td>2025.9.26</td></tr>
+        <tr><td>PDF</td><td>fpdf2</td><td>2.7.9</td></tr>
+        <tr><td>Base de datos</td><td>PostgreSQL (Neon Cloud)</td><td>—</td></tr>
+        <tr><td>Contenedores</td><td>Docker + Compose</td><td>3.8</td></tr>
+      </table>
+    </section>
+
+    <section class="card" id="estructura">
+      <h2>Estructura de directorios</h2>
+      <div class="code"><span class="lbl">text</span><pre>Backend/
+├── app.py                        # Streamlit UI + generate_report_pdf()
+├── manage.py                     # Punto de entrada Django
+├── cleanup_media.py              # Limpieza de temporales (&gt;5 min)
+├── crontab                       # Cron cada 5 min
+├── requirements.txt              # google-generativeai, fpdf2, ...
+├── translation_generator_app/
+│   ├── services/                 # youtube, transcription, analysis
+│   ├── serializers/              # validación del payload
+│   ├── views/                    # ContentAnalysisView
+│   ├── exceptions.py             # AnalysisException, etc.
+│   ├── models.py                 # translationPost
+│   └── urls.py                   # /api/generate-report/
+├── ai_translation/               # settings, urls, wsgi, asgi
+├── media/                        # videos/audio temporales
+└── docs/                         # ARCHITECTURE, KEY_COMPONENTS,
+                                  # GIT_REORGANIZATION_MANUAL,
+                                  # PROYECTO_STATE, docs.html</pre></div>
+    </section>
+
+    <section class="card" id="componentes">
+      <h2>Componentes principales</h2>
+      <h3>Servicios</h3>
+      <div class="groups">
+        <div class="group"><h4>YouTubeService</h4>Extracción de título y descarga con yt-dlp (headers anti-bot).<div class="chips"><span class="chip">get_title</span><span class="chip">download_video_and_audio</span></div></div>
+        <div class="group"><h4>TranscriptionService</h4>Sube audio a AssemblyAI y devuelve texto crudo.<div class="chips"><span class="chip">transcribe_audio</span></div></div>
+        <div class="group"><h4>AnalysisService</h4>Reporte de 5 secciones con Gemini + fallback por cuota.<div class="chips"><span class="chip">generate_report</span><span class="chip">_try_with_fallback</span><span class="chip">_chunk_text</span></div></div>
+      </div>
+      <h3>Interfaz Streamlit (app.py)</h3>
+      <p>Contenedor ligero sin lógica de negocio: importa servicios directamente, usa <code>st.session_state</code>, captura excepciones personalizadas y ofrece descarga del reporte en PDF vía <code>generate_report_pdf()</code>.</p>
+      <h3>Excepciones</h3>
+      <div class="groups">
+        <div class="group"><h4>Base</h4><div class="chips"><span class="chip">TranslationGeneratorException</span></div></div>
+        <div class="group"><h4>Específicas</h4><div class="chips"><span class="chip">YouTubeDownloadException</span><span class="chip">TranscriptionException</span><span class="chip">AnalysisException</span><span class="chip">InvalidDataException</span></div></div>
+      </div>
+      <h3>Base de datos</h3>
+      <p>Modelo <code>translationPost</code>: <code>youtube_title</code>, <code>youtube_link</code>, <code>generated_content</code> (reporte), <code>created_at</code>. Escritura al final del proceso exitoso.</p>
+      <h3>Reporte de contenido (5 secciones)</h3>
+      <div class="steps">
+        <div class="step"><span class="n">1</span><div><strong>Temas principales tratados.</strong></div></div>
+        <div class="step"><span class="n">2</span><div><strong>Argumento / resumen narrativo.</strong></div></div>
+        <div class="step"><span class="n">3</span><div><strong>Opiniones o puntos de vista.</strong></div></div>
+        <div class="step"><span class="n">4</span><div><strong>Datos o hechos clave.</strong></div></div>
+        <div class="step"><span class="n">5</span><div><strong>Conclusión / veredicto final.</strong></div></div>
+      </div>
+    </section>
+
+    <section class="card" id="api">
+      <h2>API REST</h2>
+      <div class="endpoint"><span class="verb">POST</span><span>/api/generate-report/</span></div>
+      <div class="code"><span class="lbl">JSON — request</span><pre>{
+  "link": "https://youtube.com/watch?v=...",
+  "gemini_api_key": "AI..."
+}</pre></div>
+      <div class="code"><span class="lbl">JSON — response 200</span><pre>{
+  "report": "Reporte de contenido...",
+  "title": "Título del Video",
+  "original_transcription": "Texto original...",
+  "transcription_file": "/ruta/al/transcript.txt"
+}</pre></div>
+      <div class="callout c-warn"><span class="lbl">Errores</span><code>400</code> datos inválidos · <code>500</code> descarga/transcripción/análisis. Cada etapa tiene su excepción y mensaje específico.</div>
+    </section>
+
+    <section class="card" id="cambios">
+      <h2>Cambios recientes</h2>
+      <table>
+        <tr><th>Aspecto</th><th>Antes</th><th>Ahora</th></tr>
+        <tr><td>Propósito</td><td>Traducir canciones</td><td>Reporte de contenido</td></tr>
+        <tr><td>IA</td><td>OpenAI</td><td>Google Gemini</td></tr>
+        <tr><td>Endpoint</td><td>/api/generate-translation/</td><td>/api/generate-report/</td></tr>
+        <tr><td>Servicio</td><td>TranslationService</td><td>AnalysisService</td></tr>
+        <tr><td>Salida</td><td>Versos traducidos</td><td>Reporte + PDF</td></tr>
+      </table>
+      <div class="callout c-info"><span class="lbl">Fallback por cuota</span><code>gemini-3.5-flash-lite → gemini-3.1-flash-lite → gemini-2.5-flash-lite → gemini-2.5-flash → gemini-3-flash → gemini-3.7-flash → gemini-3.8-flash → gemini-3.5-flash → gemini-3.6-flash → gemini-flash-latest → gemma-4-26b / gemma-4-31b</code>. Retries ante <code>429</code>/<code>RESOURCE_EXHAUSTED</code> y <code>404</code>.</div>
+    </section>
+
+    <section class="card" id="entorno">
+      <h2>Configuración del entorno</h2>
+      <div class="code"><span class="lbl">ini — .env (servidor)</span><pre># AssemblyAI - transcripción (servidor, nunca se pide al usuario)
+AAI_API_KEY="..."
+
+# NOTA: la API key de Google Gemini NO va en el .env.
+# Cada usuario la ingresa en el sidebar de Streamlit
+# o en el payload REST (gemini_api_key).
+
+# Base de Datos (Neon Cloud PostgreSQL)
+DB_NAME=neondb
+DB_USER=neondb_owner
+DB_HOST=...
+
+# Django
+SECRET_KEY=...
+DEBUG=True</pre></div>
+    </section>
+
+    <section class="card" id="despliegue">
+      <h2>Despliegue</h2>
+      <div class="code"><span class="lbl">bash</span><pre>docker-compose up --build          # ambos servicios
+docker compose build --no-cache backend   # tras cambios en requirements
+docker compose restart backend frontend   # tras cambios de código</pre></div>
+      <p>Frontend (Streamlit): <code>http://localhost:8501</code> · Backend API: <code>http://localhost:8000</code>. Ambos montan <code>./media</code>; solo el backend corre <code>crond</code>.</p>
+    </section>
+
+    <section class="card" id="mantenimiento">
+      <h2>Mantenimiento</h2>
+      <p><code>cleanup_media.py</code> borra archivos de <code>media/</code> con más de 5 minutos (<code>AGE_LIMIT_SECONDS = 300</code>, por <code>mtime</code>). El cron lo ejecuta cada 5 minutos:</p>
+      <div class="code"><span class="lbl">cron</span><pre>*/5 * * * * python /backend/cleanup_media.py &gt;&gt; /var/log/cron.log 2&gt;&amp;1</pre></div>
+      <div class="callout c-warn"><span class="lbl">Nota</span>Tiempo real de borrado: 5–10 min tras la creación. Requiere el contenedor <code>backend</code> activo (es el único que inicia <code>crond</code>).</div>
+    </section>
+
+    <section class="card" id="faq">
+      <h2>Preguntas frecuentes</h2>
+      <p><strong>¿Qué modelo de Gemini se usa?</strong><br />Primario <code>gemini-3.5-flash-lite</code> (500 RPD) con cadena de fallback mapeada por cuota.</p>
+      <p><strong>¿Por qué el reporte sale en español aunque el video sea en otro idioma?</strong><br />El prompt instruye responder exclusivamente en español; no hay traducción, solo análisis.</p>
+      <p><strong>¿Por qué falla con “video muy largo”?</strong><br />La transcripción se trunca a 30000 caracteres y se procesa en chunks; si Gemini excede el timeout o la cuota diaria, se sugiere un video más corto o reintentar.</p>
+      <p><strong>¿Para qué sirve la API key del .env si Gemini se pide en el frontend?</strong><br />En el <code>.env</code> solo vive <code>AAI_API_KEY</code> (AssemblyAI), porque la transcripción nunca se pide al usuario. Gemini sí se pide por usuario.</p>
+      <p><strong>¿Dónde está el historial Git?</strong><br />Ver <code>docs/GIT_REORGANIZATION_MANUAL.md</code> (main reemplazada por feature/deploy, respaldo en main-old).</p>
+    </section>
+
+    <section class="card checklist" id="checklist">
+      <h2>Checklist de verificación</h2>
+      <ol>
+        <li><code>AnalysisService</code> importa en backend y frontend.</li>
+        <li><code>google-generativeai==0.8.4</code> y <code>fpdf2==2.7.9</code> instalados en imágenes.</li>
+        <li>Endpoint <code>/api/generate-report/</code> responde.</li>
+        <li>Botón <strong>Download Report (PDF)</strong> visible tras generar el reporte.</li>
+        <li><code>GEMINI_API_KEY</code> fuera del <code>.env</code>; documentado en README y PROYECTO_STATE.</li>
+        <li>PDF pandoc (<code>PROYECTO_STATE.pdf</code>) y PDF diseñado generados.</li>
+      </ol>
+    </section>
+
+    <footer>TicSocial S. A. S. · YT-AGENT-AI · Backend · rama main</footer>
+  </main>
+</div>
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#toc a'));
+  var map = {};
+  links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+  function onScroll() {
+    var current = null;
+    Object.keys(map).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el && el.getBoundingClientRect().top < 200) current = id;
+    });
+    links.forEach(function (a) { a.classList.remove('active'); });
+    if (current && map[current]) map[current].classList.add('active');
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+</script>
+</body>
+</html>
