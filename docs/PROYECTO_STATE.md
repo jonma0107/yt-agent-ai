@@ -1,6 +1,5 @@
 ---
 title: "YT-AGENT-AI - Documentacion del Proyecto"
-author: "TicSocial S. A. S."
 date: "2026"
 graphics: true
 header-includes: |

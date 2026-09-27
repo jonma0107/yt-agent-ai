@@ -1,6 +1,5 @@
 ---
 title: "YT-AGENT-AI - Componentes Clave y Decisiones Técnicas"
-author: "TicSocial S. A. S."
 date: "2026"
 graphics: true
 header-includes: |

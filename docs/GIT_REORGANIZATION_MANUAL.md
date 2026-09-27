@@ -1,6 +1,5 @@
 ---
 title: "YT-AGENT-AI - Manual de Reorganización de Ramas Git"
-author: "TicSocial S. A. S."
 date: "2026"
 graphics: true
 header-includes: |
