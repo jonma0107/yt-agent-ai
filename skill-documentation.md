@@ -6,29 +6,28 @@ Esta skill estandariza la documentación de cualquier proyecto.
 Produce dos artefactos con el mismo contenido:
 
 1. **HTML diseñado → PDF fiel**: con los colores, el orden y la
-   tipografía del estándar HTML de esta carpeta (tomado de los
-   archivos `docs-cliente.html` y `docs.html`), convertido a PDF con
-   el script `.sh` incluido en esta skill.
-2. **Markdown → PDF simple**: archivo `.md` convertido a PDF con el
-   comando de pandoc de esta skill.
+   tipografía del estándar HTML incluido en esta skill, convertido a PDF
+   ejecutando el comando de Chrome headless directamente en la terminal
+   (sin crear archivos `.sh`).
+2. **Markdown → PDF simple**: archivo `.md` convertido a PDF ejecutando
+   el comando de pandoc directamente en la terminal (sin crear archivos `.sh`).
 
-### 1. Verificar Pandoc
+> Regla operativa: el agente NUNCA crea scripts `.sh` para las
+> conversiones. Ejecuta los comandos de esta skill tal cual en la
+> terminal, adaptando solo nombres de archivo y carpeta.
 
-Antes de documentar, asegúrate de que Pandoc esté instalado globalmente. Si no lo está, instálalo:
+### 1. Verificar herramientas
 
-```bash
-sudo apt-get install pandoc
-```
-
-Para el PDF diseñado se requiere además `google-chrome`
-(preserva colores y tipografías; pandoc no reproduce ese diseño).
-Para el PDF pandoc se requiere `texlive-xetex`:
+Antes de documentar, verifica que las herramientas estén instaladas. Si falta alguna, instálala:
 
 ```bash
 which pandoc google-chrome xelatex
 fc-list | grep -i "dejavu"
-sudo apt-get install texlive-xetex
+sudo apt-get install pandoc texlive-xetex
 ```
+
+- PDF diseñado → requiere `google-chrome` (preserva colores y tipografías; pandoc no reproduce ese diseño).
+- PDF pandoc → requiere `texlive-xetex` y fuentes DejaVu.
 
 ### 2. Estructura inicial para toda documentación
 
@@ -75,15 +74,25 @@ Usa la siguiente sintaxis para títulos y subtítulos en Markdown:
 
 - Escribe la documentación en formato .md siguiendo la estructura y estilos anteriores.
 
-### 5. Convertir a PDF
+### 5. Convertir Markdown a PDF (comando directo, sin .sh)
 
-Utiliza el siguiente comando para convertir tu archivo Markdown a PDF:
+Ejecuta en la terminal, adaptando nombres de archivo y carpeta:
 
 ```bash
-pandoc README.md -o README.pdf --pdf-engine=xelatex -V colorlinks=true -V linkcolor=blue -V urlcolor=blue -V toccolor=black --highlight-style=tango --toc --toc-depth=3 -V papersize=a3 -V fontsize=11pt -V mainfont="DejaVu Sans" -V monofont="DejaVu Sans Mono"
+cd docs && pandoc PROYECTO_STATE.md -o PROYECTO_STATE.pdf --pdf-engine=xelatex -V colorlinks=true -V linkcolor=blue -V urlcolor=blue -V toccolor=black --highlight-style=tango --toc --toc-depth=3 -V papersize=a3 -V fontsize=11pt -V mainfont="DejaVu Sans" -V monofont="DejaVu Sans Mono"
 ```
 
-> Reemplaza README.md por el nombre de tu archivo .md.
+> Reemplaza `docs`, `PROYECTO_STATE.md` y `PROYECTO_STATE.pdf` por tu carpeta y archivos.
+
+### 6. Convertir HTML diseñado a PDF (comando directo, sin .sh)
+
+Ejecuta en la terminal, adaptando nombres de archivo y carpeta. Chrome headless preserva colores, orden y tipografías (sin headers/footers):
+
+```bash
+cd docs && google-chrome --headless --disable-gpu --no-sandbox --print-to-pdf="docs.pdf" --print-to-pdf-no-header "file://$(pwd)/docs.html"
+```
+
+> Reemplaza `docs`, `docs.html` y `docs.pdf` por tu carpeta y archivos.
 
 ---
 
@@ -129,10 +138,7 @@ Este archivo SKILL.md puede copiarse y adaptarse en cualquier proyecto para esta
 
 ## Estándar HTML diseñado (colores, orden y tipografía)
 
-Los archivos `docs-cliente.html` (versión para cliente) y `docs.html`
-(versión interna) definen el estándar. Todo HTML nuevo debe copiar su
-`<style>` íntegro como base y componer el `<body>` en el orden
-indicado abajo.
+Todo HTML nuevo debe copiar el `<head>` (fuentes) y el `<style>` íntegro de abajo como base, y componer el `<body>` en el orden indicado en la sección C.
 
 ### A. Fuentes (no cambiar)
 
@@ -173,25 +179,385 @@ indicado abajo.
 Bloques de código: fondo `#0f172a`, texto `#e7efe9`, claves
 `#8ec8f0`, strings `#e6c07b`, etiqueta `#9bb8b0`.
 Hero: gradiente `145deg, #353b4e 0%, #1f6fad 58%, #3ab37e 100%`
-con adorno `::after` en naranja al `0.22` de opacidad.
-Barra superior: gradiente en tercios azul, verde y naranja.
+con adorno `::after` en naranja al `0.22` de opacidad (cuadrado de
+120px rotado 18deg en la esquina superior derecha).
+Barra superior: gradiente horizontal en tercios azul, verde y naranja.
+Píldoras HTTP: `200` verde, `201` azul, `400` naranja, `401` rojo, `405` gris.
 
-### C. Componentes y orden del `<body>`
+### C. `<style>` base completo (copiar íntegro, no omitir nada)
 
-1. `.brand-bar` (barra tricolor de 6px).
-2. `header.masthead` (logo + `.meta` con título y URL base).
-3. `.shell` → `nav` (marca, subtítulo, enlaces con `class="active"`
-   en el primero) + `main`.
-4. `section.hero` (`.kicker`, `h1`, párrafo resumen, `.pills` con una
-   `.pill.prod` destacada en naranja).
-5. Secciones `h2` con `id`, con el `nav` enlazando a cada `id`.
-6. Componentes según necesidad: `.callout` (`c-sage/c-warn/c-ok/c-info`
-   con `.lbl`), `.steps` (`.step` + `.n`), `table` (`th` en azul
-   oscuro), `.code` (con `.lbl`: JSON/bash/headers), `.endpoint`
-   (`.verb`), `.groups` (`.group > h4 + .chips > .chip`), `.err`
-   (header con código HTTP + `.code`), `.checklist` (`ol > li`).
-7. `footer` (organización · producto · URL base · rama).
-8. `<script>` de scroll-spy del nav (copiar de los HTML de referencia).
+```css
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Source Sans 3", "Segoe UI", sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+}
+.brand-bar {
+  height: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--blue) 0 33.3%,
+    var(--green) 33.3% 66.6%,
+    var(--orange) 66.6% 100%
+  );
+}
+.masthead {
+  background: #fff;
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-bottom: 1px solid var(--line);
+}
+.masthead img {
+  height: 52px;
+  width: auto;
+  display: block;
+}
+.masthead .meta {
+  color: var(--muted);
+  font-size: 13px;
+  text-align: right;
+}
+.masthead strong { color: var(--ink); font-weight: 600; }
+.shell {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 880px);
+  gap: 0 40px;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 20px 72px;
+}
+nav {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  padding: 32px 16px 24px 0;
+  overflow: auto;
+  border-right: 1px solid var(--line);
+}
+.brand {
+  font-family: Fraunces, Georgia, serif;
+  font-size: 18px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.brand em { color: var(--blue); font-style: normal; }
+nav .sub {
+  margin: 0 0 24px;
+  color: var(--muted);
+  font-size: 13px;
+}
+nav a {
+  display: block;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 14px;
+  padding: 6px 0 6px 12px;
+  border-left: 2px solid transparent;
+}
+nav a:hover { color: var(--navy); }
+nav a.active {
+  color: var(--blue-dark);
+  font-weight: 600;
+  border-left-color: var(--blue);
+}
+main { padding-top: 32px; min-width: 0; }
+.hero {
+  background: linear-gradient(145deg, #353b4e 0%, #1f6fad 58%, #3ab37e 100%);
+  color: #fff;
+  border-radius: 18px;
+  padding: 34px 36px 30px;
+  margin-bottom: 8px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  right: -12px;
+  top: -12px;
+  width: 120px;
+  height: 120px;
+  background: var(--orange);
+  opacity: 0.22;
+  border-radius: 28px;
+  transform: rotate(18deg);
+}
+.kicker {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 11px;
+  color: #dbeafe;
+}
+.hero h1 {
+  font-family: Fraunces, Georgia, serif;
+  font-size: 38px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  margin: 0 0 10px;
+}
+.hero p { margin: 0; color: #e0e7ff; max-width: 40em; position: relative; z-index: 1; }
+.hero h1 { position: relative; z-index: 1; }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; position: relative; z-index: 1; }
+.pill {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+.pill.prod {
+  background: var(--orange);
+  color: #1c1917;
+}
+h2 {
+  font-family: Fraunces, Georgia, serif;
+  font-weight: 500;
+  font-size: 26px;
+  color: var(--blue-dark);
+  margin: 44px 0 12px;
+}
+h3 { font-size: 17px; margin: 26px 0 8px; color: var(--blue-dark); }
+p { margin: 0 0 12px; }
+p code, td code, li code {
+  font-family: "Source Code Pro", ui-monospace, monospace;
+  font-size: 0.86em;
+  background: #eef2ff;
+  padding: 1px 6px;
+  border-radius: 5px;
+}
+.callout {
+  border-radius: 12px;
+  padding: 13px 16px;
+  margin: 14px 0 18px;
+  font-size: 15px;
+}
+.callout .lbl {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.c-sage { background: var(--sage); color: #14532d; }
+.c-warn { background: var(--warn-bg); color: #9a3412; }
+.c-ok { background: var(--ok-bg); color: #14532d; }
+.c-info { background: #dbeafe; color: #1e3a8a; }
+.steps { display: grid; gap: 10px; margin: 16px 0 8px; }
+.step {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+}
+.n {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+.step:nth-child(2) .n { background: var(--green); }
+.step:nth-child(3) .n { background: var(--orange); }
+.step h4 { margin: 0 0 2px; font-size: 16px; }
+.step p { margin: 0; color: var(--muted); font-size: 15px; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card);
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 15px;
+  margin: 10px 0 20px;
+}
+th, td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--line); }
+th { background: var(--blue-dark); color: #fff; font-size: 13px; }
+.code {
+  position: relative;
+  background: #0f172a;
+  color: #e7efe9;
+  border-radius: 12px;
+  padding: 16px 16px 14px;
+  overflow: auto;
+  margin: 8px 0 18px;
+  font-family: "Source Code Pro", ui-monospace, monospace;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+.code .lbl {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-family: "Source Sans 3", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9bb8b0;
+}
+pre { margin: 0; white-space: pre-wrap; }
+.k { color: #8ec8f0; }
+.s { color: #e6c07b; }
+.http {
+  display: inline-block;
+  font-family: "Source Code Pro", monospace;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.h200 { background: var(--ok-bg); color: var(--ok); }
+.h201 { background: #dbeafe; color: var(--blue-dark); }
+.h400 { background: var(--warn-bg); color: var(--warn); }
+.h401 { background: var(--err-bg); color: var(--err); }
+.h405 { background: #ececec; color: #444; }
+.endpoint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 10px 0 16px;
+  font-family: "Source Code Pro", monospace;
+  font-size: 14px;
+  overflow-x: auto;
+}
+.verb {
+  background: var(--teal);
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.groups { display: grid; gap: 12px; margin: 10px 0 8px; }
+.group {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+.group h4 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--blue-dark);
+}
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 3px 8px;
+  font-family: "Source Code Pro", monospace;
+  font-size: 12px;
+}
+.tabs { display: flex; gap: 6px; margin: 8px 0 0; }
+.tab {
+  border: 1px solid var(--line);
+  background: transparent;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  color: var(--muted);
+}
+.tab[aria-selected="true"] {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+}
+.panel[hidden] { display: none; }
+.err {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  margin: 0 0 12px;
+  overflow: hidden;
+}
+.err header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px 4px;
+  font-weight: 600;
+}
+.err .code { margin: 8px 14px 14px; }
+.checklist {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 4px 6px;
+}
+.checklist ol { margin: 0; padding: 0; }
+.checklist li {
+  list-style: none;
+  padding: 10px 10px 10px 36px;
+  position: relative;
+  border-bottom: 1px solid var(--line);
+}
+.checklist li:last-child { border-bottom: 0; }
+.checklist li::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 14px;
+  width: 15px;
+  height: 15px;
+  border-radius: 4px;
+  border: 2px solid var(--green);
+}
+footer {
+  margin-top: 40px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 14px;
+}
+@media (max-width: 840px) {
+  .shell { grid-template-columns: 1fr; }
+  nav {
+    position: relative;
+    height: auto;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .hero h1 { font-size: 30px; }
+}
+@media print {
+  @page { size: A4; margin: 12mm 12mm 16mm; }
+  body { background: #fff; }
+  nav { display: none; }
+  .shell { grid-template-columns: 1fr; padding: 16px 8px 0; max-width: none; }
+  .masthead { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .brand-bar, .hero, .pill, .http, .n, th, .verb {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .hero { break-inside: avoid; }
+  .callout, .step, .group, .err, table, .code { break-inside: avoid; }
+  a { color: inherit; }
+}
+```
 
 ### D. Parche obligatorio: `code` dentro del hero
 
@@ -211,101 +577,66 @@ especificidad (gana a `p code`):
 .hero strong { color: #ffffff; }
 ```
 
-### E. CSS de impresión (dentro del mismo `<style>`, no omitir)
+### E. Orden del `<body>` (no cambiar)
 
-```css
-@media print {
-  @page { size: A4; margin: 12mm 12mm 16mm; }
-  body { background: #fff; }
-  nav { display: none; }
-  .shell { grid-template-columns: 1fr; padding: 16px 8px 0; max-width: none; }
-  .masthead { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .brand-bar, .hero, .pill, .http, .n, th, .verb {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .hero { break-inside: avoid; }
-  .callout, .step, .group, .err, table, .code { break-inside: avoid; }
-  a { color: inherit; }
-}
+1. `.brand-bar` (barra tricolor de 6px).
+2. `header.masthead` (logo `<img>` + `.meta` con título y URL base).
+3. `.shell` → `nav` (marca, subtítulo, enlaces con `class="active"`
+   en el primero) + `main`.
+4. `section.hero` con `id` (`.kicker`, `h1`, párrafo resumen, `.pills`
+   con una `.pill.prod` destacada en naranja).
+5. Secciones `h2` con `id`, con el `nav` enlazando a cada `id`.
+6. Componentes según necesidad: `.callout` (`c-sage`/`c-warn`/`c-ok`/`c-info`
+   con `.lbl`), `.steps` (`.step` + `.n` + `h4` + `p`), `table`
+   (`th` en azul oscuro), `.code` (con `.lbl`: JSON/bash/headers y
+   resaltado `.k`/`.s`), `.endpoint` (`.verb`), `.groups`
+   (`.group > h4 + .chips > .chip`), `.tabs` + `.tab` + `.panel`,
+   `.err` (header con píldora `.http` + `.code`), `.checklist` (`ol > li`).
+7. `footer` (organización · producto · URL base · rama).
+8. `<script>` con dos bloques: tabs (Postman/curl) y scroll-spy del nav:
+
+```html
+<script>
+  document.querySelectorAll(".tabs").forEach((tabs) => {
+    const buttons = [...tabs.querySelectorAll(".tab")];
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        buttons.forEach((b) => b.setAttribute("aria-selected", "false"));
+        btn.setAttribute("aria-selected", "true");
+        buttons.forEach((b) => {
+          const panel = document.getElementById(b.dataset.tab);
+          if (panel) panel.hidden = b !== btn;
+        });
+      });
+    });
+  });
+  const links = [...document.querySelectorAll("nav a")];
+  const sections = links
+    .map((a) => document.querySelector(a.getAttribute("href")))
+    .filter(Boolean);
+  document.addEventListener("scroll", () => {
+    const y = window.scrollY + 90;
+    let current = sections[0];
+    for (const section of sections) {
+      if (section.offsetTop <= y) current = section;
+    }
+    links.forEach((a) => {
+      a.classList.toggle(
+        "active",
+        a.getAttribute("href") === "#" + current.id
+      );
+    });
+  }, { passive: true });
+</script>
 ```
-
-Sin `print-color-adjust: exact` el PDF sale en grises.
 
 ### F. Variantes cliente vs interna
 
-- **Cliente** (`docs-cliente.html`): la contraparte entrega las
+- **Versión para cliente**: la contraparte entrega las
   credenciales por canal seguro; NO incluir sección de registro.
-- **Interna** (`docs.html`): SÍ incluir la sección de registro
+- **Versión interna**: SÍ incluir la sección de registro
   (“Registrar el cliente — una sola vez”) con tabs Postman/curl,
   respuesta `201` y callout de provisión.
-
-### G. Script HTML → PDF (dentro de la skill)
-
-Archivo `html_to_pdf.sh` (ejecutable). Convierte el HTML diseñado a
-PDF preservando colores, orden y tipografías:
-
-```bash
-#!/usr/bin/env bash
-# HTML diseñado -> PDF fiel (Chrome headless, sin headers/footers).
-# Uso: ./html_to_pdf.sh [archivo.html] [nombre_base_pdf]
-set -euo pipefail
-cd "$(dirname "$0")"
-
-HTML="${1:-index.html}"
-BASE="${2:-${HTML%.html}}"
-
-if ! command -v google-chrome >/dev/null 2>&1; then
-  echo "ERROR: se requiere google-chrome para preservar colores y tipografías." >&2
-  exit 1
-fi
-
-google-chrome \
-  --headless \
-  --disable-gpu \
-  --no-sandbox \
-  --print-to-pdf="${BASE}.pdf" \
-  --print-to-pdf-no-header \
-  "file://$(pwd)/${HTML}"
-
-echo "OK: ${BASE}.pdf"
-```
-
-Uso:
-
-```bash
-./html_to_pdf.sh index.html Mi-Guia
-```
-
-### H. Script Markdown → PDF (dentro de la skill)
-
-Archivo `md_to_pdf.sh` (ejecutable, recibe el `.md` como argumento):
-
-```bash
-#!/usr/bin/env bash
-# Markdown -> PDF simple (pandoc + xelatex) según esta skill.
-# Uso: ./md_to_pdf.sh [archivo.md]
-set -euo pipefail
-cd "$(dirname "$0")"
-
-MD="${1:-README.md}"
-PDF="${MD%.md}-pandoc.pdf"
-
-pandoc "$MD" -o "$PDF" \
-  --pdf-engine=xelatex \
-  -V colorlinks=true -V linkcolor=blue -V urlcolor=blue -V toccolor=black \
-  --highlight-style=tango --toc --toc-depth=3 \
-  -V papersize=a3 -V fontsize=11pt \
-  -V mainfont="DejaVu Sans" -V monofont="DejaVu Sans Mono"
-
-echo "OK: $PDF"
-```
-
-Uso:
-
-```bash
-./md_to_pdf.sh README.md
-```
 
 ---
 
@@ -404,13 +735,15 @@ Incluye una sección que resuma los principales módulos, scripts o componentes 
 ### 8. Buenas prácticas para gráficos
 - Usa gráficos para explicar flujos de permisos, procesos de negocio, o arquitectura.
 - Si el flujo es complejo, acompaña el gráfico con una breve explicación textual.
+- Si mencionas el contenido de un video en la documentación, incluye su link en la sección correspondiente.
 
 ### 9. Ejemplo de sección FAQ
 
-### 	extcolor{blue}{Preguntas Frecuentes}
+### \textcolor{blue}{Preguntas Frecuentes}
 
 - **¿Cómo genero el PDF?**  
-  Usa el comando Pandoc especificado en la plantilla.
+  Ejecuta en la terminal el comando pandoc de la sección 5 (Markdown → PDF)
+  o el comando de Chrome de la sección 6 (HTML diseñado → PDF).
 - **¿Qué hago si falta un permiso?**  
   Revisa la sección de componentes y verifica la configuración en Django.
 
@@ -435,11 +768,13 @@ Puedes incluir enlaces a recursos externos, imágenes o videos para enriquecer l
 
 ## Checklist de verificación (no entregar sin esto)
 
-- [ ] El HTML copia el `<style>` de referencia e incluye el parche
+- [ ] El HTML copia el `<style>` base íntegro de esta skill e incluye el parche
   `.hero code` (códigos del hero legibles, sin pastillas blancas).
 - [ ] El nav enlaza a todos los `id` de sección; scroll-spy activo.
-- [ ] PDF diseñado generado (`./html_to_pdf.sh`) y revisada la página 1.
+- [ ] PDF diseñado generado (comando Chrome headless de la sección 6,
+  ejecutado directo en terminal) y revisada la página 1.
 - [ ] `.md` con YAML, títulos `\textcolor{blue}`, FAQ, componentes y
   diagramas donde aplique.
-- [ ] PDF pandoc generado (`./md_to_pdf.sh`) sin errores de LaTeX.
-- [ ] Variante correcta: cliente (sin registro) o interna (con registro).
+- [ ] PDF pandoc generado (comando pandoc de la sección 5, ejecutado
+  directo en terminal) sin errores de LaTeX.
+- [ ] Variante correcta: para cliente (sin registro) o interna (con registro).
