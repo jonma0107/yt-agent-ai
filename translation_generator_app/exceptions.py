@@ -1,10 +1,10 @@
 """
-Custom exceptions for the translation generator app.
+Custom exceptions for the content analysis app.
 """
 
 
 class TranslationGeneratorException(Exception):
-    """Base exception for all translation generator errors."""
+    """Base exception for all content analysis errors."""
     pass
 
 
@@ -18,8 +18,8 @@ class TranscriptionException(TranslationGeneratorException):
     pass
 
 
-class TranslationException(TranslationGeneratorException):
-    """Raised when translation/formatting fails."""
+class AnalysisException(TranslationGeneratorException):
+    """Raised when content analysis fails."""
     pass
 
 
