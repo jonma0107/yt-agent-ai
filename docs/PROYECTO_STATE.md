@@ -110,7 +110,7 @@ Backend/
 │   ├── apps.py                               # Configuracion de la app
 │   ├── models.py                             # Modelo translationPost
 │   ├── exceptions.py                         # Jerarquia de excepciones
-│   ├── urls.py                               # URLs del endpoint /api/generate-report/
+│   ├── urls.py                               # URLs del endpoint /generate-report/
 │   ├── services/                             # Logica de negocio
 │   │   ├── __init__.py                       # Exporta YouTubeService, TranscriptionService, AnalysisService
 │   │   ├── youtube_service.py                # Descarga de video/audio con yt-dlp
@@ -121,7 +121,7 @@ Backend/
 │   │   └── translation_serializer.py         # TranslationRequestValidator
 │   ├── views/                                # Vistas de API
 │   │   ├── __init__.py
-│   │   └── views_app.py                     # ContentAnalysisView (POST /api/generate-report/)
+│   │   └── views_app.py                     # ContentAnalysisView (POST /generate-report/)
 │   └── __pycache__/
 ├── ai_translation/                           # Configuracion de Django
 │   ├── __init__.py
@@ -171,7 +171,7 @@ La UI principal de la aplicacion. Es un contenedor ligero alrededor de la Capa d
 
 Endpoint disponible:
 
-- **POST /api/generate-report/** — Genera un Reporte de Contenido
+- **POST /generate-report/** — Genera un Reporte de Contenido
 
 **Payload de entrada:**
 ```json
@@ -222,7 +222,7 @@ Modelo `translationPost`:
 |---------|-------------------|------------------------------|
 | **Proposito** | Traducir letras de canciones | Analizar contenido de videos |
 | **IA** | OpenAI (GPT-4o/Turbo) | Google Gemini (gemini-3.5-flash) |
-| **Endpoint** | POST /api/generate-translation/ | POST /api/generate-report/ |
+| **Endpoint** | POST /api/generate-translation/ | POST /generate-report/ |
 | **Output** | Traduccion formateada en versos | Reporte de contenido (5 secciones) |
 | **Input adicional** | target_language | Sin parametro de idioma |
 | **Servicio** | TranslationService | AnalysisService |
@@ -306,7 +306,7 @@ El script `cleanup_media.py` elimina archivos temporales (.mp4, .mp3, .txt) mayo
   Si, se descarga el audio internamente para alimentar a AssemblyAI, que requiere un archivo de audio local. El video y audio se eliminan automaticamente tras 5 minutos mediante el script de limpieza.
 
 - **Puedo usar la API REST en lugar de Streamlit?**
-  Si, el endpoint `POST /api/generate-report/` esta disponible. Necesitas enviar la URL de YouTube y tu API Key de Gemini.
+  Si, el endpoint `POST /generate-report/` esta disponible. Necesitas enviar la URL de YouTube y tu API Key de Gemini.
 
 - **Que idiomas soporta el analisis?**
   El analisis se realiza en español independientemente del idioma de la transcripcion original, ya que el prompt de Gemini instruye generar el reporte exclusivamente en español.
@@ -328,7 +328,7 @@ El script `cleanup_media.py` elimina archivos temporales (.mp4, .mp3, .txt) mayo
 - [x] AnalysisService importa correctamente en contenedor frontend
 - [x] google-generativeai==0.8.4 instalado y funcionando
 - [x] GEMINI_API_KEY provista por el usuario en Streamlit/REST (no va en .env)
-- [x] Endpoint /api/generate-report/ disponible
+- [x] Endpoint /generate-report/ disponible
 - [x] Streamlit UI actualizada con UI de Reporte de Contenido
 - [x] translation_service.py eliminado
 - [x] GIT_REORGANIZATION_MANUAL.md movido a docs/

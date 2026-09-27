@@ -289,7 +289,7 @@ footer {
       <p>App web que analiza videos de YouTube: transcribe el audio con <strong>AssemblyAI</strong> y genera un <strong>reporte de contenido estructurado</strong> con <strong>Google Gemini</strong>. Interfaz <code>Streamlit</code> + API REST <code>Django</code>.</p>
       <div class="pills">
         <span class="pill prod">gemini-3.5-flash-lite</span>
-        <span class="pill">POST /api/generate-report/</span>
+        <span class="pill">POST /generate-report/</span>
         <span class="pill">Clean Architecture</span>
         <span class="pill">Docker</span>
       </div>
@@ -343,7 +343,7 @@ footer {
 │   ├── views/                    # ContentAnalysisView
 │   ├── exceptions.py             # AnalysisException, etc.
 │   ├── models.py                 # translationPost
-│   └── urls.py                   # /api/generate-report/
+│   └── urls.py                   # /generate-report/
 ├── ai_translation/               # settings, urls, wsgi, asgi
 ├── media/                        # videos/audio temporales
 └── docs/                         # ARCHITECTURE, KEY_COMPONENTS,
@@ -380,7 +380,7 @@ footer {
 
     <section class="card" id="api">
       <h2>API REST</h2>
-      <div class="endpoint"><span class="verb">POST</span><span>/api/generate-report/</span></div>
+      <div class="endpoint"><span class="verb">POST</span><span>/generate-report/</span></div>
       <div class="code"><span class="lbl">JSON — request</span><pre>{
   "link": "https://youtube.com/watch?v=...",
   "gemini_api_key": "AI..."
@@ -400,7 +400,7 @@ footer {
         <tr><th>Aspecto</th><th>Antes</th><th>Ahora</th></tr>
         <tr><td>Propósito</td><td>Traducir canciones</td><td>Reporte de contenido</td></tr>
         <tr><td>IA</td><td>OpenAI</td><td>Google Gemini</td></tr>
-        <tr><td>Endpoint</td><td>/api/generate-translation/</td><td>/api/generate-report/</td></tr>
+        <tr><td>Endpoint</td><td>/api/generate-translation/</td><td>/generate-report/</td></tr>
         <tr><td>Servicio</td><td>TranslationService</td><td>AnalysisService</td></tr>
         <tr><td>Salida</td><td>Versos traducidos</td><td>Reporte + PDF</td></tr>
       </table>
@@ -455,7 +455,7 @@ docker compose restart backend frontend   # tras cambios de código</pre></div>
       <ol>
         <li><code>AnalysisService</code> importa en backend y frontend.</li>
         <li><code>google-generativeai==0.8.4</code> y <code>fpdf2==2.7.9</code> instalados en imágenes.</li>
-        <li>Endpoint <code>/api/generate-report/</code> responde.</li>
+        <li>Endpoint <code>/generate-report/</code> responde.</li>
         <li>Botón <strong>Download Report (PDF)</strong> visible tras generar el reporte.</li>
         <li><code>GEMINI_API_KEY</code> fuera del <code>.env</code>; documentado en README y PROYECTO_STATE.</li>
         <li>PDF pandoc (<code>PROYECTO_STATE.pdf</code>) y PDF diseñado generados.</li>

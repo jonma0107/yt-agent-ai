@@ -135,7 +135,7 @@ El frontend es un contenedor ligero alrededor de la Capa de Servicio. **No** con
 
 Aunque la app Streamlit es la interfaz principal, el backend expone un endpoint REST:
 
-**Endpoint:** `POST /api/generate-report/`
+**Endpoint:** `POST /generate-report/`
 
 **Payload:**
 ```json

@@ -76,6 +76,41 @@ La forma más fácil de ejecutar la aplicación es usando **Docker Compose**.
 
      *   **Frontend (Streamlit)**: [http://localhost:8501](http://localhost:8501)
      *   **Backend API**: [http://localhost:8000](http://localhost:8000)
+     *   **Admin Django**: [http://localhost:8000/admin](http://localhost:8000/admin)
+
+---
+
+## 🔐 Autenticación y Usuarios
+
+La app usa el sistema de usuarios nativo de Django. Tanto Streamlit como el
+endpoint `POST /generate-report/` exigen iniciar sesión.
+
+1.  **Crear el superusuario (una sola vez):**
+
+     ```bash
+     python manage.py createsuperuser
+     ```
+
+2.  **Crear usuarios adicionales:** entra al admin con el superusuario
+    (`/admin/` → *Users* → *Add user*) y asígnales usuario y contraseña.
+    Esos mismos usuarios sirven para Streamlit y para la API.
+
+3.  **Usar la API:**
+
+     ```bash
+     # Iniciar sesión (guarda la cookie de sesión con -c)
+     curl -c cookies.txt -X POST http://localhost:8000/login/ \
+       -H "Content-Type: application/json" \
+       -d '{"username": "usuario", "password": "secreto"}'
+
+     # Generar reporte (reutiliza la cookie con -b)
+     curl -b cookies.txt -X POST http://localhost:8000/generate-report/ \
+       -H "Content-Type: application/json" \
+       -d '{"link": "https://youtube.com/watch?v=...", "gemini_api_key": "AI..."}'
+
+     # Cerrar sesión
+     curl -b cookies.txt -X POST http://localhost:8000/logout/
+     ```
 
 ---
 
