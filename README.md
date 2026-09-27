@@ -112,6 +112,18 @@ endpoint `POST /generate-report/` exigen iniciar sesión.
      curl -b cookies.txt -X POST http://localhost:8000/logout/
      ```
 
+4.  **Throttling (DRF):** la API limita el ritmo de peticiones para proteger
+    el login (fuerza bruta) y el reporte (operación costosa). Se configura en
+    `ai_translation/settings.py` (`REST_FRAMEWORK`) y se ajusta por entorno
+    sin tocar código:
+
+     ```ini
+     LOGIN_THROTTLE_RATE=5/min
+     REPORT_THROTTLE_RATE=10/hour
+     ```
+
+     Al exceder el límite, la API responde `429` con `{"detail": "Request was throttled..."}`.
+
 ---
 
 ## 🏗️ Arquitectura

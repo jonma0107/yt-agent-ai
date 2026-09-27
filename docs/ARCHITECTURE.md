@@ -122,6 +122,14 @@ El frontend es un contenedor ligero alrededor de la Capa de Servicio. **No** con
     *   `AnalysisException`
     *   `InvalidDataException`
 
+### 4. Seguridad API: autenticación + throttling (DRF)
+
+*   **Autenticación**: sesión Django (`User` nativo). `POST /login/` abre sesión, `POST /logout/` la cierra, `POST /generate-report/` exige usuario autenticado (401 si no).
+*   **Throttling**: `rest_framework.throttling.ScopedRateThrottle` como clase por defecto en `ai_translation/settings.py` (`REST_FRAMEWORK`). Cada vista declara su `throttle_scope`:
+    *   `LoginView` → scope `login` (anti fuerza bruta, default `5/min`).
+    *   `ContentAnalysisView` → scope `report` (operación costosa, default `10/hour`).
+*   **Ajuste por entorno**: `LOGIN_THROTTLE_RATE` y `REPORT_THROTTLE_RATE` en `.env`, formato `<n>/<s|m|h|d>`. Al exceder el límite, DRF responde `429`.
+
 ## 🔄 Flujo de Ejecución
 
 1.  **Entrada**: El usuario proporciona URL de YouTube y API Key de Gemini.
