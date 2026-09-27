@@ -1,25 +1,25 @@
-import django_setup
-import os
+"""
+YouTube Agent - Streamlit frontend.
+
+This is a pure HTTP client of the Django API. It holds no business logic:
+- Auth: POST /login/ (session cookie kept in a requests.Session).
+- Analysis: POST /generate-report/ (auth + throttling enforced server-side).
+- Media downloads: fetched from the API's /media/ URLs with the session.
+- Report PDF: generated locally with fpdf2.
+
+Configuration (environment):
+- BACKEND_URL: Django API base URL. Default http://localhost:8000.
+  In Docker Compose the frontend reaches the backend as http://backend:8000.
+- API_TIMEOUT: seconds to wait for /generate-report/ (default 900).
+"""
 import logging
+import os
 from datetime import datetime
 from io import BytesIO
 
-# Initialize Django before importing any Django models
-django_setup.setup()
-
-import streamlit as st
-from django.conf import settings
-from django.contrib.auth import authenticate
 import environ
-
-from translation_generator_app.models import translationPost
-from translation_generator_app.services import YouTubeService, TranscriptionService, AnalysisService
-from translation_generator_app.exceptions import (
-    YouTubeDownloadException,
-    TranscriptionException,
-    AnalysisException,
-    TranslationGeneratorException
-)
+import requests
+import streamlit as st
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -28,73 +28,124 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 env = environ.Env()
 environ.Env.read_env()
+BACKEND_URL = env('BACKEND_URL', default='http://localhost:8000').rstrip('/')
 # Nota: la API key de Gemini la provee cada usuario en el sidebar de Streamlit
 # (parametro gemini_api_key), no se lee del entorno.
-AAI_API_KEY = env('AAI_API_KEY')
+API_TIMEOUT = int(env('API_TIMEOUT', default='900'))
 
 
-def process_youtube_video_for_analysis(yt_link: str, gemini_api_key: str) -> dict:
+class ApiError(Exception):
+    """Raised when the backend API answers with an error."""
+
+    def __init__(self, message: str, status_code: int = 0):
+        super().__init__(message)
+        self.status_code = status_code
+
+
+def _parse_api_error(response: requests.Response, default: str) -> str:
+    """Extract a friendly message from an API error response."""
+    try:
+        data = response.json()
+        return data.get('error') or data.get('detail') or default
+    except ValueError:
+        return default
+
+
+def api_login(username: str, password: str) -> None:
     """
-    Process YouTube video using the service architecture to generate a content report.
-
-    Args:
-        yt_link: YouTube video URL
-        gemini_api_key: Google Gemini API key for analysis
-
-    Returns:
-        Dictionary with processing results
+    Log in against POST /login/ and keep the session cookie.
 
     Raises:
-        YouTubeDownloadException: If download fails
-        TranscriptionException: If transcription fails
-        AnalysisException: If analysis fails
+        ApiError: on invalid credentials, throttling or connection issues.
     """
-    youtube_service = YouTubeService()
-    transcription_service = TranscriptionService(api_key=AAI_API_KEY)
-    analysis_service = AnalysisService(api_key=gemini_api_key)
+    session = requests.Session()
+    try:
+        response = session.post(
+            f'{BACKEND_URL}/login/',
+            json={'username': username, 'password': password},
+            timeout=30,
+        )
+    except requests.ConnectionError:
+        raise ApiError(f'No se pudo conectar con el backend ({BACKEND_URL}).')
 
-    # Step 1: Get video title
-    logger.info(f"Fetching title for: {yt_link}")
-    title = youtube_service.get_title(yt_link)
-    logger.info(f"Video title: {title}")
+    if response.status_code == 200:
+        st.session_state.api_session = session
+        st.session_state.authenticated_user = username
+        logger.info(f"Streamlit login via API: {username}")
+        return
+    if response.status_code == 429:
+        raise ApiError('Demasiados intentos. Espera un momento e inténtalo de nuevo.', 429)
+    raise ApiError(_parse_api_error(response, 'Credenciales inválidas.'), response.status_code)
 
-    # Step 2: Download video and audio
-    logger.info(f"Downloading video and audio for: {title}")
-    video_file, audio_file = youtube_service.download_video_and_audio(yt_link, title)
-    logger.info(f"Downloaded - Video: {video_file}, Audio: {audio_file}")
 
-    # Step 3: Transcribe audio
-    logger.info(f"Transcribing audio: {audio_file}")
-    original_text = transcription_service.transcribe_audio(audio_file, title)
-    logger.info(f"Transcription complete, length: {len(original_text)} chars")
+def api_logout() -> None:
+    """Close the backend session and clear local state."""
+    session = st.session_state.get('api_session')
+    if session is not None:
+        try:
+            session.post(f'{BACKEND_URL}/logout/', timeout=15)
+        except requests.RequestException as e:
+            logger.warning(f"API logout failed (clearing local session anyway): {e}")
+    for key in ('authenticated_user', 'api_session', 'result'):
+        st.session_state.pop(key, None)
 
-    # Step 4: Generate content report
-    logger.info("Generating content report")
-    result = analysis_service.generate_report(original_text)
-    logger.info("Analysis complete")
 
-    # Step 5: Save to database
-    analysis_entry = translationPost.objects.create(
-        youtube_title=title,
-        youtube_link=yt_link,
-        generated_content=result['report']
-    )
-    analysis_entry.save()
-    logger.info(f"Saved analysis to database, ID: {analysis_entry.id}")
+def api_generate_report(yt_link: str, gemini_api_key: str) -> dict:
+    """
+    Call POST /generate-report/ and return the parsed result.
 
-    # Prepare transcript file path
-    safe_title = "".join(c for c in title if c.isalnum() or c in (' ', '_', '-')).rstrip()
-    transcription_file = settings.MEDIA_ROOT / f"{safe_title}.txt"
+    Auth and throttling are enforced server-side (401/429).
 
-    return {
-        "title": title,
-        "report": result['report'],
-        "original_transcription": original_text,
-        "video_file": video_file,
-        "audio_file": audio_file,
-        "transcription_file": str(transcription_file),
-        "youtube_link": yt_link,
-    }
+    Raises:
+        ApiError: on any API or connection error.
+    """
+    session = st.session_state.get('api_session')
+    if session is None:
+        raise ApiError('Sesión expirada. Inicia sesión de nuevo.', 401)
+
+    try:
+        response = session.post(
+            f'{BACKEND_URL}/generate-report/',
+            json={'link': yt_link, 'gemini_api_key': gemini_api_key},
+            timeout=API_TIMEOUT,
+        )
+    except requests.ConnectionError:
+        raise ApiError(f'No se pudo conectar con el backend ({BACKEND_URL}).')
+    except requests.Timeout:
+        raise ApiError('El análisis tardó demasiado. Intenta con un video más corto.')
+
+    if response.status_code == 200:
+        data = response.json()
+        data['youtube_link'] = yt_link
+        return data
+    if response.status_code == 401:
+        raise ApiError('Sesión expirada. Inicia sesión de nuevo.', 401)
+    if response.status_code == 429:
+        raise ApiError(
+            'Límite de reportes excedido. Espera e inténtalo de nuevo.', 429)
+    raise ApiError(
+        _parse_api_error(response, 'El backend devolvió un error inesperado.'),
+        response.status_code)
+
+
+def api_download_media(media_url: str) -> bytes:
+    """
+    Fetch a /media/ file from the backend with the session.
+
+    Raises:
+        ApiError: if the download fails.
+    """
+    session = st.session_state.get('api_session')
+    if session is None:
+        raise ApiError('Sesión expirada. Inicia sesión de nuevo.', 401)
+    try:
+        response = session.get(f'{BACKEND_URL}{media_url}', timeout=300)
+    except requests.RequestException as e:
+        raise ApiError(f'No se pudo descargar el archivo: {e}')
+    if response.status_code != 200:
+        raise ApiError(f'No se pudo descargar el archivo (HTTP {response.status_code}).',
+                       response.status_code)
+    return response.content
 
 
 def generate_report_pdf(report_text: str, title: str, youtube_url: str = "") -> bytes:
@@ -178,12 +229,9 @@ def generate_report_pdf(report_text: str, title: str, youtube_url: str = "") -> 
         pdf.multi_cell(0, 6, safe_clean)
         pdf.ln(0.5)
 
-    # Footer page numbers are handled by FPDF automatically if needed
-
     # Output to bytes
-    # fpdf2: output(dest="S") returns str or bytes depending on version; use BytesIO for consistency
+    # fpdf2: output with BytesIO for consistency across versions
     try:
-        # New fpdf2: output with BytesIO
         buf = BytesIO()
         pdf.output(buf)
         return buf.getvalue()
@@ -196,7 +244,7 @@ def generate_report_pdf(report_text: str, title: str, youtube_url: str = "") -> 
 
 def _require_login() -> bool:
     """
-    Show a login screen until the user authenticates with a Django user.
+    Show a login screen until the user authenticates via the API.
 
     Returns:
         True if the user is authenticated, False otherwise.
@@ -216,16 +264,12 @@ def _require_login() -> bool:
         if not username or not password:
             st.error("Ingresa usuario y contraseña.")
         else:
-            user = authenticate(username=username, password=password)
-            if user is None:
-                st.error("Credenciales inválidas.")
-                logger.warning(f"Failed Streamlit login attempt for username: {username}")
-            elif not user.is_active:
-                st.error("La cuenta de usuario está deshabilitada.")
-            else:
-                st.session_state.authenticated_user = user.username
-                logger.info(f"Streamlit login: {username}")
+            try:
+                api_login(username, password)
                 st.rerun()
+            except ApiError as e:
+                st.error(f"❌ {e}")
+                logger.warning(f"Failed Streamlit login attempt for username: {username}")
 
     return False
 
@@ -242,8 +286,7 @@ def main():
         st.write(f"Sesión: **{st.session_state.authenticated_user}**")
         if st.button("Cerrar sesión"):
             logger.info(f"Streamlit logout: {st.session_state.authenticated_user}")
-            for key in ('authenticated_user', 'result'):
-                st.session_state.pop(key, None)
+            api_logout()
             st.rerun()
         gemini_api_key = st.text_input("Gemini API Key", type="password")
         st.info("This app uses Google Gemini models with automatic fallback. Please ensure your API key has access to the Flash models (e.g. `gemini-3.5-flash-lite`).")
@@ -263,34 +306,16 @@ def main():
         elif not youtube_url:
             st.error("Please enter a YouTube URL.")
         else:
-            with st.spinner("Processing..."):
+            with st.spinner("Processing... (puede tardar varios minutos)"):
                 try:
-                    st.session_state.result = process_youtube_video_for_analysis(
+                    st.session_state.result = api_generate_report(
                         youtube_url,
                         gemini_api_key
                     )
 
-                except YouTubeDownloadException as e:
-                    st.error(f"❌ YouTube Download Error: {str(e)}")
-                    logger.error(f"YouTube download error: {str(e)}")
-                    if 'result' in st.session_state:
-                        del st.session_state.result
-
-                except TranscriptionException as e:
-                    st.error(f"❌ Transcription Error: {str(e)}")
-                    logger.error(f"Transcription error: {str(e)}")
-                    if 'result' in st.session_state:
-                        del st.session_state.result
-
-                except AnalysisException as e:
-                    st.error(f"❌ Analysis Error: {str(e)}")
-                    logger.error(f"Analysis error: {str(e)}")
-                    if 'result' in st.session_state:
-                        del st.session_state.result
-
-                except TranslationGeneratorException as e:
-                    st.error(f"❌ Error: {str(e)}")
-                    logger.error(f"General error: {str(e)}")
+                except ApiError as e:
+                    st.error(f"❌ {e}")
+                    logger.error(f"API error ({e.status_code}): {e}")
                     if 'result' in st.session_state:
                         del st.session_state.result
 
@@ -332,23 +357,23 @@ def main():
             st.warning("No se pudo generar el PDF del reporte.")
 
         st.subheader("Downloads")
-        video_file_path = result['video_file']
-        with open(video_file_path, "rb") as file:
-            st.download_button(
-                label="Download Video",
-                data=file,
-                file_name=os.path.basename(video_file_path),
-                mime="video/mp4"
-            )
-
-        audio_file_path = result['audio_file']
-        with open(audio_file_path, "rb") as file:
-            st.download_button(
-                label="Download Audio (MP3)",
-                data=file,
-                file_name=os.path.basename(audio_file_path),
-                mime="audio/mpeg"
-            )
+        for label, url_key, mime in (
+            ("Download Video", "video_url", "video/mp4"),
+            ("Download Audio (MP3)", "audio_url", "audio/mpeg"),
+        ):
+            media_url = result.get(url_key)
+            if not media_url:
+                continue
+            file_name = os.path.basename(media_url)
+            try:
+                st.download_button(
+                    label=label,
+                    data=api_download_media(media_url),
+                    file_name=file_name,
+                    mime=mime,
+                )
+            except ApiError as e:
+                st.warning(f"No se pudo preparar {label.lower()}: {e}")
 
 if __name__ == "__main__":
-    main() 
+    main()

@@ -12,7 +12,7 @@ services:
       - ./media:/backend/media      
     env_file:
       - .env
-    command: sh -c "crond && python manage.py migrate && tail -f /dev/null"
+    command: sh -c "crond && python manage.py migrate && gunicorn ai_translation.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 900 --worker-class gevent --log-level info"
 
   frontend:
     build:
@@ -25,6 +25,8 @@ services:
       - ./media:/backend/media
     env_file:
       - .env
+    environment:
+      - BACKEND_URL=http://backend:8000
     command: >
       sh -c "streamlit run app.py"
     depends_on:

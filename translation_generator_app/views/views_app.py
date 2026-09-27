@@ -7,6 +7,7 @@ Rate configured in settings.py (REPORT_THROTTLE_RATE).
 """
 import json
 import logging
+import os
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -52,7 +53,9 @@ class ContentAnalysisView(APIView):
             "report": "content report...",
             "title": "video title",
             "original_transcription": "original text...",
-            "transcription_file": "/path/to/transcript.txt"
+            "transcription_file": "/path/to/transcript.txt",
+            "video_url": "/media/video.mp4",
+            "audio_url": "/media/audio.mp3"
         }
     Response (429):
         {"detail": "Request was throttled..."}
@@ -91,7 +94,9 @@ class ContentAnalysisView(APIView):
                 'report': result['report'],
                 'title': result['title'],
                 'original_transcription': result['original_transcription'],
-                'transcription_file': result['transcription_file']
+                'transcription_file': result['transcription_file'],
+                'video_url': settings.MEDIA_URL + os.path.basename(result['video_file']),
+                'audio_url': settings.MEDIA_URL + os.path.basename(result['audio_file']),
             }, status=status.HTTP_200_OK)
 
         except InvalidDataException as e:
@@ -202,7 +207,9 @@ class ContentAnalysisView(APIView):
             "title": title,
             "report": result['report'],
             "original_transcription": original_text,
-            "transcription_file": str(transcription_file)
+            "transcription_file": str(transcription_file),
+            "video_file": video_file,
+            "audio_file": audio_file,
         }
 
 
