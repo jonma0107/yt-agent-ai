@@ -1,3 +1,31 @@
+---
+title: "YT-AGENT-AI - Manual de Reorganización de Ramas Git"
+author: "TicSocial S. A. S."
+date: "2026"
+graphics: true
+header-includes: |
+  \usepackage{float}
+  \usepackage{longtable}
+  \usepackage{booktabs}
+  \usepackage{array}
+  \usepackage{makecell}
+  \usepackage{fvextra}
+  \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+  \renewcommand{\arraystretch}{1.4}
+  \let\origfigure\figure
+  \let\endorigfigure\endfigure
+  \renewenvironment{figure}[1][2] {
+    \expandafter\origfigure\expandafter[H]
+  } {
+    \endorigfigure
+  }
+
+geometry: "top=3cm,bottom=3cm,left=4cm,right=2cm"
+lang: "es"
+toc: true
+toc-title: "Índice de Contenidos"
+---
+
 # Manual de Reorganización de Ramas Git
 
 Este documento detalla los pasos ejecutados para reemplazar la rama `main` antigua con el contenido de `feature/deploy` y limpiar las ramas obsoletas (`develop`).
@@ -79,3 +107,10 @@ Eliminación de ramas que ya no son necesarias o que quedaron huérfanas tras el
 | **main-old** | Respaldo del historial antiguo | **Respaldo** |
 | feature/deploy | Rama de trabajo anterior | *Eliminada* |
 | develop | Rama de desarrollo anterior | *Eliminada* |
+
+## ❓ Preguntas Frecuentes
+
+- **¿Puedo borrar `main-old`?**
+  Sí, cuando ya no necesites el respaldo del historial antiguo: `git push origin --delete main-old` y `git branch -D main-old`.
+- **¿Por qué hubo que cambiar la rama por defecto dos veces?**
+  GitHub no permite borrar/renombrar la rama marcada como Default; primero se movió a `feature/deploy` para liberar `main`, y al final se restauró a la nueva `main`.

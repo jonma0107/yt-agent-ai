@@ -1,3 +1,31 @@
+---
+title: "YT-AGENT-AI - Componentes Clave y Decisiones Técnicas"
+author: "TicSocial S. A. S."
+date: "2026"
+graphics: true
+header-includes: |
+  \usepackage{float}
+  \usepackage{longtable}
+  \usepackage{booktabs}
+  \usepackage{array}
+  \usepackage{makecell}
+  \usepackage{fvextra}
+  \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+  \renewcommand{\arraystretch}{1.4}
+  \let\origfigure\figure
+  \let\endorigfigure\endfigure
+  \renewenvironment{figure}[1][2] {
+    \expandafter\origfigure\expandafter[H]
+  } {
+    \endorigfigure
+  }
+
+geometry: "top=3cm,bottom=3cm,left=4cm,right=2cm"
+lang: "es"
+toc: true
+toc-title: "Índice de Contenidos"
+---
+
 # Explicación de Archivos Clave y Decisiones Técnicas
 
 Este documento profundiza en los componentes auxiliares del sistema, la estrategia de limpieza de datos, la configuración del entorno y el rol de la base de datos. Sirve como complemento a la documentación de Arquitectura.
@@ -84,3 +112,11 @@ Aunque la app parece procesar en tiempo real y mostrar el resultado, necesitamos
 2.  Los servicios procesan todo en memoria/archivos temporales.
 3.  **Solo al final**, si todo fue exitoso, el orquestador crea una entrada en `translationPost`.
 4.  Actualmente, estos datos son de **escritura** (Logging/History). La aplicación no lee estos datos para mostrarlos al usuario (no hay un "feed" de análisis anteriores), pero la arquitectura está lista para esa funcionalidad si se necesitara.
+## ❓ Preguntas Frecuentes
+
+- **¿Para qué sirve `cleanup_media.py` si los archivos se descargan igual?**
+  Sin limpieza, cada solicitud deja un `.mp4` + `.mp3` + `.txt` en disco. El cron cada 5 minutos borra los mayores a 5 minutos y evita el desbordamiento.
+- **¿Por qué `django_setup.py`?**
+  Streamlit corre fuera de Django; sin ese puente no puede importar `translationPost` ni usar el ORM.
+- **¿La base de datos se consulta en algún flujo?**
+  No. Hoy es solo escritura (historial/auditoría) al final del proceso exitoso.

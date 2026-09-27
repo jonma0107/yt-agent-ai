@@ -8,28 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Source+Sans+3:wght@400;600;700&family=Source+Code+Pro:wght@450;600&display=swap" rel="stylesheet" />
 <style>
-:root {
-  --blue: #3498db;
-  --blue-dark: #1f6fad;
-  --green: #3ab37e;
-  --orange: #f58d6d;
-  --ink: #353b4e;
-  --muted: #5c6578;
-  --line: #e4e7ec;
-  --paper: #f7f8fa;
-  --card: #ffffff;
-  --navy: #353b4e;
-  --teal: #3498db;
-  --sage: #e4f6ee;
-  --ok: #2f8f62;
-  --ok-bg: #e4f6ee;
-  --warn: #c05621;
-  --warn-bg: #ffeee8;
-  --err: #b91c1c;
-  --err-bg: #fee2e2;
-  --black: #0b0b0b;
-}
 * { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 body {
   margin: 0;
   background: var(--paper);
@@ -40,120 +20,136 @@ body {
 }
 .brand-bar {
   height: 6px;
-  background: linear-gradient(to right, var(--blue) 0 33.3%, var(--green) 33.3% 66.6%, var(--orange) 66.6% 100%);
+  background: linear-gradient(
+    90deg,
+    var(--blue) 0 33.3%,
+    var(--green) 33.3% 66.6%,
+    var(--orange) 66.6% 100%
+  );
 }
 .masthead {
+  background: #fff;
+  padding: 18px 24px;
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 18px 32px;
-  background: var(--card);
+  justify-content: space-between;
+  gap: 24px;
   border-bottom: 1px solid var(--line);
 }
-.masthead .logo {
-  font-family: Fraunces, Georgia, serif;
-  font-weight: 600;
-  font-size: 1.4rem;
-  color: var(--navy);
+.masthead img {
+  height: 52px;
+  width: auto;
+  display: block;
 }
-.masthead .meta { color: var(--muted); font-size: 0.9rem; }
+.masthead .meta {
+  color: var(--muted);
+  font-size: 13px;
+  text-align: right;
+}
+.masthead strong { color: var(--ink); font-weight: 600; }
 .shell {
   display: grid;
-  grid-template-columns: 260px 1fr;
-  max-width: 1200px;
+  grid-template-columns: 220px minmax(0, 880px);
+  gap: 0 40px;
+  max-width: 1120px;
   margin: 0 auto;
-  padding: 24px 24px 0;
-  gap: 24px;
+  padding: 0 20px 72px;
 }
 nav {
   position: sticky;
-  top: 16px;
-  align-self: start;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 16px;
+  top: 0;
+  height: 100vh;
+  padding: 32px 16px 24px 0;
+  overflow: auto;
+  border-right: 1px solid var(--line);
 }
-nav .brand { font-weight: 700; color: var(--navy); }
-nav .sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 12px; }
+.brand {
+  font-family: Fraunces, Georgia, serif;
+  font-size: 18px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.brand em { color: var(--blue); font-style: normal; }
+nav .sub {
+  margin: 0 0 24px;
+  color: var(--muted);
+  font-size: 13px;
+}
 nav a {
   display: block;
-  color: var(--ink);
+  color: var(--muted);
   text-decoration: none;
-  padding: 6px 8px;
-  border-radius: 6px;
-  font-size: 0.92rem;
+  font-size: 14px;
+  padding: 6px 0 6px 12px;
+  border-left: 2px solid transparent;
 }
-nav a:hover { background: var(--paper); }
-nav a.active { background: var(--sage); color: var(--ok); font-weight: 600; }
-main { min-width: 0; }
-section.hero {
+nav a:hover { color: var(--navy); }
+nav a.active {
+  color: var(--blue-dark);
+  font-weight: 600;
+  border-left-color: var(--blue);
+}
+main { padding-top: 32px; min-width: 0; }
+.hero {
+  background: linear-gradient(145deg, #353b4e 0%, #1f6fad 58%, #3ab37e 100%);
+  color: #fff;
+  border-radius: 18px;
+  padding: 34px 36px 30px;
+  margin-bottom: 8px;
   position: relative;
   overflow: hidden;
-  border-radius: 12px;
-  padding: 40px 36px;
-  color: #fff;
-  background: linear-gradient(145deg, #353b4e 0%, #1f6fad 58%, #3ab37e 100%);
 }
-section.hero::after {
+.hero::after {
   content: "";
   position: absolute;
-  inset: 0;
+  right: -12px;
+  top: -12px;
+  width: 120px;
+  height: 120px;
   background: var(--orange);
   opacity: 0.22;
-  pointer-events: none;
+  border-radius: 28px;
+  transform: rotate(18deg);
 }
-section.hero .kicker {
-  display: inline-block;
+.kicker {
+  margin: 0 0 8px;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.8rem;
-  font-weight: 700;
-  opacity: 0.9;
+  letter-spacing: 0.14em;
+  font-size: 11px;
+  color: #dbeafe;
 }
-section.hero h1 {
+.hero h1 {
   font-family: Fraunces, Georgia, serif;
+  font-size: 38px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  margin: 0 0 10px;
+}
+.hero p { margin: 0; color: #e0e7ff; max-width: 40em; position: relative; z-index: 1; }
+.hero h1 { position: relative; z-index: 1; }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; position: relative; z-index: 1; }
+.pill {
+  font-size: 12px;
   font-weight: 600;
-  font-size: 2.2rem;
-  margin: 8px 0 12px;
-}
-section.hero p { max-width: 640px; }
-section.hero .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; position: relative; z-index: 1; }
-section.hero .pill {
-  font-family: "Source Code Pro", ui-monospace, monospace;
-  font-size: 0.82rem;
-  background: rgba(255,255,255,0.16);
-  border: 1px solid rgba(255,255,255,0.25);
-  padding: 4px 10px;
-  border-radius: 20px;
-}
-section.hero .pill.prod { background: var(--orange); border-color: var(--orange); font-weight: 600; }
-.hero code {
-  font-family: "Source Code Pro", ui-monospace, monospace;
-  font-size: 0.86em;
+  padding: 5px 10px;
+  border-radius: 999px;
   background: rgba(255, 255, 255, 0.16);
-  color: #ffd9a3;
-  padding: 1px 6px;
-  border-radius: 5px;
+  color: #fff;
 }
-.hero strong { color: #ffffff; }
-section.card {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 28px 32px;
-  margin: 24px 0;
+.pill.prod {
+  background: var(--orange);
+  color: #1c1917;
 }
 h2 {
   font-family: Fraunces, Georgia, serif;
+  font-weight: 500;
+  font-size: 26px;
   color: var(--blue-dark);
-  font-size: 1.5rem;
-  border-bottom: 2px solid var(--line);
-  padding-bottom: 8px;
+  margin: 44px 0 12px;
 }
-h3 { color: var(--navy); }
-h4 { color: var(--blue-dark); margin-bottom: 4px; }
-p code, li code, td code {
+h3 { font-size: 17px; margin: 26px 0 8px; color: var(--blue-dark); }
+p { margin: 0 0 12px; }
+p code, td code, li code {
   font-family: "Source Code Pro", ui-monospace, monospace;
   font-size: 0.86em;
   background: #eef2ff;
@@ -161,87 +157,212 @@ p code, li code, td code {
   border-radius: 5px;
 }
 .callout {
-  border: 1px solid var(--line);
-  border-left: 4px solid var(--blue);
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin: 16px 0;
-  background: var(--paper);
+  border-radius: 12px;
+  padding: 13px 16px;
+  margin: 14px 0 18px;
+  font-size: 15px;
 }
-.callout .lbl { font-weight: 700; display: block; margin-bottom: 4px; }
-.callout.c-sage { border-left-color: var(--green); background: var(--ok-bg); }
-.callout.c-warn { border-left-color: var(--warn); background: var(--warn-bg); }
-.callout.c-ok { border-left-color: var(--ok); background: var(--ok-bg); }
-.callout.c-info { border-left-color: var(--blue); }
-.steps { display: flex; flex-direction: column; gap: 12px; }
-.step { display: flex; gap: 12px; align-items: flex-start; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; }
-.step .n {
-  flex: 0 0 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--blue-dark);
-  color: #fff;
+.callout .lbl {
+  display: block;
+  font-size: 11px;
   font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
 }
-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.94rem; }
-th { background: var(--blue-dark); color: #fff; text-align: left; padding: 8px 12px; }
-td { border: 1px solid var(--line); padding: 8px 12px; }
-tr:nth-child(even) td { background: var(--paper); }
+.c-sage { background: var(--sage); color: #14532d; }
+.c-warn { background: var(--warn-bg); color: #9a3412; }
+.c-ok { background: var(--ok-bg); color: #14532d; }
+.c-info { background: #dbeafe; color: #1e3a8a; }
+.steps { display: grid; gap: 10px; margin: 16px 0 8px; }
+.step {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+}
+.n {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+.step:nth-child(2) .n { background: var(--green); }
+.step:nth-child(3) .n { background: var(--orange); }
+.step h4 { margin: 0 0 2px; font-size: 16px; }
+.step p { margin: 0; color: var(--muted); font-size: 15px; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card);
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 15px;
+  margin: 10px 0 20px;
+}
+th, td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--line); }
+th { background: var(--blue-dark); color: #fff; font-size: 13px; }
 .code {
+  position: relative;
   background: #0f172a;
   color: #e7efe9;
-  border-radius: 8px;
-  padding: 16px 18px;
-  margin: 12px 0;
-  overflow-x: auto;
+  border-radius: 12px;
+  padding: 16px 16px 14px;
+  overflow: auto;
+  margin: 8px 0 18px;
   font-family: "Source Code Pro", ui-monospace, monospace;
-  font-size: 0.86rem;
+  font-size: 13.5px;
   line-height: 1.5;
 }
-.code .lbl { display: block; color: #9bb8b0; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.08em; margin-bottom: 8px; }
-.code pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
+.code .lbl {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-family: "Source Sans 3", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9bb8b0;
+}
+pre { margin: 0; white-space: pre-wrap; }
+.k { color: #8ec8f0; }
+.s { color: #e6c07b; }
+.http {
+  display: inline-block;
+  font-family: "Source Code Pro", monospace;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.h200 { background: var(--ok-bg); color: var(--ok); }
+.h201 { background: #dbeafe; color: var(--blue-dark); }
+.h400 { background: var(--warn-bg); color: var(--warn); }
+.h401 { background: var(--err-bg); color: var(--err); }
+.h405 { background: #ececec; color: #444; }
 .endpoint {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 10px 0 16px;
+  font-family: "Source Code Pro", monospace;
+  font-size: 14px;
+  overflow-x: auto;
+}
+.verb {
+  background: var(--teal);
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.groups { display: grid; gap: 12px; margin: 10px 0 8px; }
+.group {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+.group h4 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--blue-dark);
+}
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 10px 16px;
-  margin: 12px 0;
-  font-family: "Source Code Pro", ui-monospace, monospace;
+  padding: 3px 8px;
+  font-family: "Source Code Pro", monospace;
+  font-size: 12px;
 }
-.endpoint .verb {
-  background: var(--green);
-  color: #fff;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 0.85rem;
-}
-.groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
-.group { border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; background: var(--paper); }
-.group .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-.group .chip {
-  font-family: "Source Code Pro", ui-monospace, monospace;
-  font-size: 0.8rem;
-  background: #eef2ff;
+.tabs { display: flex; gap: 6px; margin: 8px 0 0; }
+.tab {
   border: 1px solid var(--line);
-  padding: 2px 8px;
-  border-radius: 12px;
-}
-.checklist ol { padding-left: 20px; }
-.checklist li { margin: 4px 0; }
-footer {
-  text-align: center;
+  background: transparent;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
   color: var(--muted);
-  font-size: 0.85rem;
-  padding: 24px;
+}
+.tab[aria-selected="true"] {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+}
+.panel[hidden] { display: none; }
+.err {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  margin: 0 0 12px;
+  overflow: hidden;
+}
+.err header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px 4px;
+  font-weight: 600;
+}
+.err .code { margin: 8px 14px 14px; }
+.checklist {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 4px 6px;
+}
+.checklist ol { margin: 0; padding: 0; }
+.checklist li {
+  list-style: none;
+  padding: 10px 10px 10px 36px;
+  position: relative;
+  border-bottom: 1px solid var(--line);
+}
+.checklist li:last-child { border-bottom: 0; }
+.checklist li::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 14px;
+  width: 15px;
+  height: 15px;
+  border-radius: 4px;
+  border: 2px solid var(--green);
+}
+footer {
+  margin-top: 40px;
+  padding-top: 16px;
   border-top: 1px solid var(--line);
-  margin-top: 24px;
+  color: var(--muted);
+  font-size: 14px;
+}
+@media (max-width: 840px) {
+  .shell { grid-template-columns: 1fr; }
+  nav {
+    position: relative;
+    height: auto;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .hero h1 { font-size: 30px; }
 }
 @media print {
   @page { size: A4; margin: 12mm 12mm 16mm; }
@@ -257,6 +378,26 @@ footer {
   .callout, .step, .group, .err, table, .code { break-inside: avoid; }
   a { color: inherit; }
 }
+.hero code {
+  font-family: "Source Code Pro", ui-monospace, monospace;
+  font-size: 0.86em;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffd9a3;
+  padding: 1px 6px;
+  border-radius: 5px;
+}
+.hero strong { color: #ffffff; }
+/* Extensión del proyecto: tarjetas de sección + píldora HTTP 429
+   (la base de la skill solo define .h200/.h201/.h400/.h401/.h405) */
+.h429 { background: var(--warn-bg); color: var(--warn); }
+section.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 28px 32px;
+  margin: 24px 0;
+}
+section.card h2:first-child { margin-top: 0; }
 </style>
 </head>
 <body>
@@ -275,6 +416,7 @@ footer {
     <a href="#estructura">Estructura</a>
     <a href="#componentes">Componentes</a>
     <a href="#api">API REST</a>
+    <a href="#seguridad">Autenticación y throttling</a>
     <a href="#cambios">Cambios recientes</a>
     <a href="#entorno">Entorno</a>
     <a href="#despliegue">Despliegue</a>
@@ -290,7 +432,7 @@ footer {
       <div class="pills">
         <span class="pill prod">gemini-3.5-flash-lite</span>
         <span class="pill">POST /generate-report/</span>
-        <span class="pill">Clean Architecture</span>
+        <span class="pill">Auth + Throttling</span>
         <span class="pill">Docker</span>
       </div>
     </section>
@@ -324,6 +466,7 @@ footer {
         <tr><td>IA</td><td>Google Gemini</td><td>gemini-3.5-flash-lite</td></tr>
         <tr><td>Descarga</td><td>yt-dlp</td><td>2025.9.26</td></tr>
         <tr><td>PDF</td><td>fpdf2</td><td>2.7.9</td></tr>
+        <tr><td>API framework</td><td>Django REST Framework</td><td>3.14.0</td></tr>
         <tr><td>Base de datos</td><td>PostgreSQL (Neon Cloud)</td><td>—</td></tr>
         <tr><td>Contenedores</td><td>Docker + Compose</td><td>3.8</td></tr>
       </table>
@@ -336,11 +479,12 @@ footer {
 ├── manage.py                     # Punto de entrada Django
 ├── cleanup_media.py              # Limpieza de temporales (&gt;5 min)
 ├── crontab                       # Cron cada 5 min
-├── requirements.txt              # google-generativeai, fpdf2, ...
+├── requirements.txt              # google-generativeai, fpdf2, djangorestframework
+├── .env.example                    # plantilla de variables de entorno
 ├── translation_generator_app/
 │   ├── services/                 # youtube, transcription, analysis
 │   ├── serializers/              # validación del payload
-│   ├── views/                    # ContentAnalysisView
+│   ├── views/                    # ContentAnalysisView, LoginView, LogoutView
 │   ├── exceptions.py             # AnalysisException, etc.
 │   ├── models.py                 # translationPost
 │   └── urls.py                   # /generate-report/
@@ -391,7 +535,50 @@ footer {
   "original_transcription": "Texto original...",
   "transcription_file": "/ruta/al/transcript.txt"
 }</pre></div>
-      <div class="callout c-warn"><span class="lbl">Errores</span><code>400</code> datos inválidos · <code>500</code> descarga/transcripción/análisis. Cada etapa tiene su excepción y mensaje específico.</div>
+      <h3>Autenticación</h3>
+      <div class="endpoint"><span class="verb">POST</span><span>/login/</span></div>
+      <div class="endpoint"><span class="verb">POST</span><span>/logout/</span></div>
+      <div class="code"><span class="lbl">bash — login con curl</span><pre>curl -c cookies.txt -X POST http://localhost:8000/login/ \
+  -H "Content-Type: application/json" \
+  -d '{"username": "usuario", "password": "secreto"}'
+
+curl -b cookies.txt -X POST http://localhost:8000/generate-report/ \
+  -H "Content-Type: application/json" \
+  -d '{"link": "https://youtube.com/watch?v=...", "gemini_api_key": "AI..."}'</pre></div>
+      <h3>Errores</h3>
+      <table>
+        <thead><tr><th>Código</th><th>Cuándo</th></tr></thead>
+        <tbody>
+          <tr><td><span class="http h200">200</span></td><td>Login, logout o reporte generado</td></tr>
+          <tr><td><span class="http h400">400</span></td><td>JSON inválido o validación del payload</td></tr>
+          <tr><td><span class="http h401">401</span></td><td>Sin sesión o credenciales inválidas</td></tr>
+          <tr><td><span class="http h405">405</span></td><td>Método distinto de POST</td></tr>
+          <tr><td><span class="http h429">429</span></td><td>Throttling excedido (ver Seguridad)</td></tr>
+        </tbody>
+      </table>
+      <article class="err">
+        <header><span class="http h401">401</span> Sin autenticación</header>
+        <div class="code"><pre>{ "error": "Authentication required. Log in via POST /login/." }</pre></div>
+      </article>
+      <article class="err">
+        <header><span class="http h429">429</span> Throttling excedido</header>
+        <div class="code"><pre>{ "detail": "Request was throttled. Expected available in 60 seconds." }</pre></div>
+      </article>
+    </section>
+
+    <section class="card" id="seguridad">
+      <h2>Autenticación y throttling</h2>
+      <h3>Usuarios Django</h3>
+      <p>El superusuario se crea una vez con <code>python manage.py createsuperuser</code>. Los usuarios adicionales se crean en <code>/admin/ → Users → Add user</code>. Los mismos usuarios sirven para Streamlit (pantalla de login con <code>authenticate()</code>) y para la API (sesión).</p>
+      <h3>Throttling DRF</h3>
+      <p><code>rest_framework.throttling.ScopedRateThrottle</code> como clase por defecto en <code>ai_translation/settings.py</code> (<code>REST_FRAMEWORK</code>). Cada vista declara su <code>throttle_scope</code>:</p>
+      <div class="groups">
+        <div class="group"><h4>LoginView → scope login</h4>Anti fuerza bruta, default <code>5/min</code>.<div class="chips"><span class="chip">LOGIN_THROTTLE_RATE</span></div></div>
+        <div class="group"><h4>ContentAnalysisView → scope report</h4>Operación costosa, default <code>10/hour</code>.<div class="chips"><span class="chip">REPORT_THROTTLE_RATE</span></div></div>
+      </div>
+      <div class="callout c-info"><span class="lbl">Ajuste por entorno</span>Tasas en formato <code>&lt;n&gt;/&lt;s|m|h|d&gt;</code> vía <code>.env</code>, sin tocar código. Las vistas usan <code>SessionNoCSRF</code> (sesión Django sin exigir token CSRF) para que clientes no-navegador usen la cookie.</div>
+      <h3>Variables de entorno</h3>
+      <p><code>.env.example</code> es la plantilla: <code>AAI_API_KEY</code> y <code>DB_*</code> requeridos; <code>SECRET_KEY</code>/<code>DEBUG</code> con default; <code>LOGIN_THROTTLE_RATE</code>/<code>REPORT_THROTTLE_RATE</code> opcionales. La API key de Gemini nunca va en el <code>.env</code>.</p>
     </section>
 
     <section class="card" id="cambios">
@@ -455,7 +642,8 @@ docker compose restart backend frontend   # tras cambios de código</pre></div>
       <ol>
         <li><code>AnalysisService</code> importa en backend y frontend.</li>
         <li><code>google-generativeai==0.8.4</code> y <code>fpdf2==2.7.9</code> instalados en imágenes.</li>
-        <li>Endpoint <code>/generate-report/</code> responde.</li>
+        <li>Endpoint <code>/generate-report/</code> responde (401 sin sesión).</li>
+        <li>Login/logout por sesión funcionando; throttling responde <code>429</code> al exceder la tasa.</li>
         <li>Botón <strong>Download Report (PDF)</strong> visible tras generar el reporte.</li>
         <li><code>GEMINI_API_KEY</code> fuera del <code>.env</code>; documentado en README y PROYECTO_STATE.</li>
         <li>PDF pandoc (<code>PROYECTO_STATE.pdf</code>) y PDF diseñado generados.</li>
@@ -466,22 +654,36 @@ docker compose restart backend frontend   # tras cambios de código</pre></div>
   </main>
 </div>
 <script>
-(function () {
-  var links = Array.prototype.slice.call(document.querySelectorAll('#toc a'));
-  var map = {};
-  links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
-  function onScroll() {
-    var current = null;
-    Object.keys(map).forEach(function (id) {
-      var el = document.getElementById(id);
-      if (el && el.getBoundingClientRect().top < 200) current = id;
+  document.querySelectorAll(".tabs").forEach((tabs) => {
+    const buttons = [...tabs.querySelectorAll(".tab")];
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        buttons.forEach((b) => b.setAttribute("aria-selected", "false"));
+        btn.setAttribute("aria-selected", "true");
+        buttons.forEach((b) => {
+          const panel = document.getElementById(b.dataset.tab);
+          if (panel) panel.hidden = b !== btn;
+        });
+      });
     });
-    links.forEach(function (a) { a.classList.remove('active'); });
-    if (current && map[current]) map[current].classList.add('active');
-  }
-  window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
-})();
+  });
+  const links = [...document.querySelectorAll("nav a")];
+  const sections = links
+    .map((a) => document.querySelector(a.getAttribute("href")))
+    .filter(Boolean);
+  document.addEventListener("scroll", () => {
+    const y = window.scrollY + 90;
+    let current = sections[0];
+    for (const section of sections) {
+      if (section.offsetTop <= y) current = section;
+    }
+    links.forEach((a) => {
+      a.classList.toggle(
+        "active",
+        a.getAttribute("href") === "#" + current.id
+      );
+    });
+  }, { passive: true });
 </script>
 </body>
 </html>

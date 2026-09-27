@@ -86,6 +86,7 @@ Ingresar una URL de YouTube → Descargar audio → Transcribir (AssemblyAI) →
 | Transcripcion | AssemblyAI | 0.36.0 |
 | Inteligencia Artificial | Google Gemini (cadena con fallback) | gemini-3.5-flash-lite (default) |
 | Descarga de Video | yt-dlp | 2025.9.26 |
+| API framework | Django REST Framework | 3.14.0 |
 | Base de Datos | PostgreSQL | (Neon Cloud) |
 | Contenedorizacion | Docker + Docker Compose | 3.8 |
 | ORM | Django ORM | - |
@@ -214,6 +215,12 @@ Modelo `translationPost`:
 | `generated_content` | TextField | Reporte de contenido generado |
 | `created_at` | DateTimeField(auto_now_add) | Fecha de procesamiento |
 
+### \textcolor{blue}{6. Seguridad: Autenticacion y Throttling}
+
+- **Autenticacion**: usuarios nativos de Django. Superusuario con `python manage.py createsuperuser`; usuarios adicionales en `/admin/ → Users → Add user`. Streamlit exige login (`authenticate()`); `POST /generate-report/` exige sesion (`401` sin login); `POST /login/` abre sesion y `POST /logout/` la cierra.
+- **Throttling DRF**: `ScopedRateThrottle` por defecto en `ai_translation/settings.py`. `LoginView` usa scope `login` (`5/min`, anti fuerza bruta); `ContentAnalysisView` usa scope `report` (`10/hour`, operacion costosa). Ajustables con `LOGIN_THROTTLE_RATE` y `REPORT_THROTTLE_RATE`. Exceso responde `429`.
+- **Sesion sin CSRF**: `SessionNoCSRF` permite usar la cookie de sesion desde clientes no-navegador (curl/scripts).
+
 ---
 
 ### \textcolor{blue}{Cambios Recientes}
@@ -328,7 +335,8 @@ El script `cleanup_media.py` elimina archivos temporales (.mp4, .mp3, .txt) mayo
 - [x] AnalysisService importa correctamente en contenedor frontend
 - [x] google-generativeai==0.8.4 instalado y funcionando
 - [x] GEMINI_API_KEY provista por el usuario en Streamlit/REST (no va en .env)
-- [x] Endpoint /generate-report/ disponible
+- [x] Endpoint /generate-report/ disponible (401 sin sesion)
+- [x] Login/logout por sesion y throttling DRF (429 al exceder tasa)
 - [x] Streamlit UI actualizada con UI de Reporte de Contenido
 - [x] translation_service.py eliminado
 - [x] GIT_REORGANIZATION_MANUAL.md movido a docs/

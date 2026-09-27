@@ -1,3 +1,31 @@
+---
+title: "YT-AGENT-AI - Arquitectura Backend"
+author: "TicSocial S. A. S."
+date: "2026"
+graphics: true
+header-includes: |
+  \usepackage{float}
+  \usepackage{longtable}
+  \usepackage{booktabs}
+  \usepackage{array}
+  \usepackage{makecell}
+  \usepackage{fvextra}
+  \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+  \renewcommand{\arraystretch}{1.4}
+  \let\origfigure\figure
+  \let\endorigfigure\endfigure
+  \renewenvironment{figure}[1][2] {
+    \expandafter\origfigure\expandafter[H]
+  } {
+    \endorigfigure
+  }
+
+geometry: "top=3cm,bottom=3cm,left=4cm,right=2cm"
+lang: "es"
+toc: true
+toc-title: "Índice de Contenidos"
+---
+
 # Arquitectura Backend YT-AGENT-AI
 
 ## 📋 Tabla de Contenidos
@@ -163,3 +191,11 @@ Aunque la app Streamlit es la interfaz principal, el backend expone un endpoint 
     "transcription_file": "/ruta/al/transcript.txt"
 }
 ```
+## ❓ Preguntas Frecuentes
+
+- **¿Por qué el endpoint exige login?**
+  `POST /generate-report/` verifica `request.user.is_authenticated` y responde `401` sin sesión. La sesión se abre con `POST /login/`.
+- **¿Qué pasa si excedo el throttling?**
+  DRF responde `429`. `LoginView` usa scope `login` (`5/min` por defecto) y `ContentAnalysisView` scope `report` (`10/hour`); ajustables con `LOGIN_THROTTLE_RATE` y `REPORT_THROTTLE_RATE`.
+- **¿Un solo modelo de Gemini o varios?**
+  Varios en cadena con fallback: `PREFERRED_MODELS` (12 modelos) y `_try_with_fallback()` reintenta ante `429`/`404`.
