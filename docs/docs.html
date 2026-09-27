@@ -447,12 +447,12 @@ section.card h2:first-child { margin-top: 0; }
     <section class="card" id="flujo">
       <h2>Flujo de ejecución</h2>
       <div class="steps">
-        <div class="step"><span class="n">1</span><div><strong>Entrada.</strong> Usuario provee URL de YouTube y su API Key de Gemini.</div></div>
+        <div class="step"><span class="n">1</span><div><strong>Entrada.</strong> Usuario inicia sesión (Streamlit o <code>POST /login/</code>) y provee URL de YouTube y su API Key de Gemini.</div></div>
         <div class="step"><span class="n">2</span><div><strong>Descarga.</strong> <code>YouTubeService</code> obtiene título y descarga video/audio a <code>media/</code> con <code>yt-dlp</code>.</div></div>
         <div class="step"><span class="n">3</span><div><strong>Transcripción.</strong> <code>TranscriptionService</code> envía el audio a AssemblyAI y guarda el texto.</div></div>
         <div class="step"><span class="n">4</span><div><strong>Análisis.</strong> <code>AnalysisService</code> fragmenta la transcripción (chunks de 8000, máx. 30000) y genera el reporte con Gemini, con fallback entre modelos por cuota.</div></div>
         <div class="step"><span class="n">5</span><div><strong>Persistencia.</strong> Resultado guardado en <code>translationPost</code> vía Django ORM.</div></div>
-        <div class="step"><span class="n">6</span><div><strong>Visualización.</strong> Reporte en Streamlit con botón de descarga en PDF, más video/audio.</div></div>
+        <div class="step"><span class="n">6</span><div><strong>Visualización.</strong> La API responde el reporte + <code>video_url</code>/<code>audio_url</code>; Streamlit lo muestra con botones de descarga (vía HTTP con la sesión) y PDF local.</div></div>
       </div>
     </section>
 
@@ -504,7 +504,7 @@ section.card h2:first-child { margin-top: 0; }
         <div class="group"><h4>AnalysisService</h4>Reporte de 5 secciones con Gemini + fallback por cuota.<div class="chips"><span class="chip">generate_report</span><span class="chip">_try_with_fallback</span><span class="chip">_chunk_text</span></div></div>
       </div>
       <h3>Interfaz Streamlit (app.py)</h3>
-      <p>Contenedor ligero sin lógica de negocio: importa servicios directamente, usa <code>st.session_state</code>, captura excepciones personalizadas y ofrece descarga del reporte en PDF vía <code>generate_report_pdf()</code>.</p>
+      <p>Cliente HTTP puro de la API Django (<code>requests</code>), sin lógica de negocio ni imports Django: login/logout/generate-report con cookie de sesión (<code>BACKEND_URL</code>, default <code>http://localhost:8000</code>). Hereda autenticación y throttling; descargas vía <code>video_url</code>/<code>audio_url</code>; PDF local con <code>generate_report_pdf()</code>; errores <code>401</code>/<code>429</code> traducidos a mensajes amigables.</p>
       <h3>Excepciones</h3>
       <div class="groups">
         <div class="group"><h4>Base</h4><div class="chips"><span class="chip">TranslationGeneratorException</span></div></div>

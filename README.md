@@ -85,6 +85,14 @@ La forma más fácil de ejecutar la aplicación es usando **Docker Compose**.
 La app usa el sistema de usuarios nativo de Django. Tanto Streamlit como el
 endpoint `POST /generate-report/` exigen iniciar sesión.
 
+> **Streamlit es un cliente HTTP de la API:** `app.py` no importa servicios
+> ni usa Django; llama a `POST /login/`, `POST /generate-report/` y
+> `POST /logout/` con `requests`, guardando la cookie de sesión. Por eso
+> la autenticación y el throttling protegen también el uso vía Streamlit.
+> La URL del backend se configura con `BACKEND_URL` (por defecto
+> `http://localhost:8000`; en Docker Compose el frontend la recibe como
+> `http://backend:8000`).
+
 1.  **Crear el superusuario (una sola vez):**
 
      ```bash

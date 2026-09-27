@@ -63,7 +63,7 @@ graph TD
     EntryPoint --> Streamlit
     EntryPoint --> API
     
-    Streamlit --> Orchestrator
+    Streamlit --> API
     API --> Orchestrator
     
     subgraph "Capa de Servicio (Lógica de Negocio)"
@@ -137,11 +137,13 @@ Backend/
 
 ### 2. Interfaz Streamlit (`app.py`)
 
-El frontend es un contenedor ligero alrededor de la Capa de Servicio. **No** contiene lógica de negocio.
+El frontend es un cliente HTTP puro de la API Django. **No** contiene lógica de negocio ni importa código Django.
 
-*   **Llamada Directa a Servicio**: En lugar de llamar a la API de Django vía HTTP, importa los Servicios directamente (ya que comparten el mismo contenedor/código base).
-*   **Gestión de Estado**: Usa `st.session_state` para persistir resultados entre re-ejecuciones.
-*   **Manejo de Errores**: Captura excepciones personalizadas específicas (`YouTubeDownloadException`, etc.) para mostrar mensajes de error amigables al usuario.
+*   **Cliente HTTP**: Llama a `POST /login/`, `POST /generate-report/` y `POST /logout/` con `requests`, guardando la cookie de sesión en `st.session_state`. La URL del backend se configura con `BACKEND_URL` (default `http://localhost:8000`; `http://backend:8000` en Docker Compose).
+*   **Seguridad heredada**: Al pasar por la API, el uso vía Streamlit queda cubierto por la autenticación y el throttling DRF.
+*   **Gestión de Estado**: Usa `st.session_state` para sesión, resultados y persistencia entre re-ejecuciones.
+*   **Descargas**: Video/audio se obtienen de las `video_url`/`audio_url` (`/media/...`) de la respuesta, con la sesión; el PDF se genera localmente con `fpdf2`.
+*   **Manejo de Errores**: Traduce los códigos HTTP (`401` sesión expirada, `429` throttling, `400`/`500`) a mensajes amigables al usuario.
 
 ### 3. Excepciones Personalizadas (`exceptions.py`)
 
@@ -161,12 +163,12 @@ El frontend es un contenedor ligero alrededor de la Capa de Servicio. **No** con
 
 ## 🔄 Flujo de Ejecución
 
-1.  **Entrada**: El usuario proporciona URL de YouTube y API Key de Gemini.
+1.  **Entrada**: El usuario inicia sesión (Streamlit o `POST /login/`) y proporciona URL de YouTube y API Key de Gemini.
 2.  **Descarga**: `YouTubeService` descarga medios a `media/`.
 3.  **Transcripción**: `TranscriptionService` envía audio a AssemblyAI y obtiene texto.
 4.  **Análisis**: `AnalysisService` envía la transcripción a Gemini y genera un Reporte de Contenido estructurado.
 5.  **Persistencia**: resultado guardado en PostgreSQL vía Django ORM.
-6.  **Visualización**: Resultados mostrados en UI con botones de descarga.
+6.  **Visualización**: La API responde el reporte + `video_url`/`audio_url`; Streamlit lo muestra con botones de descarga (vía HTTP con la sesión) y PDF local.
 
 ## 📚 Referencia API
 

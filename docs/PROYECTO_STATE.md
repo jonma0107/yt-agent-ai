@@ -97,7 +97,8 @@ Ingresar una URL de YouTube → Descargar audio → Transcribir (AssemblyAI) →
 
 ```
 Backend/
-├── app.py                                    # Aplicacion Frontend Streamlit
+├── app.py                                    # Frontend Streamlit (cliente HTTP de la API)
+├── .env.example                            # Plantilla de variables de entorno
 ├── manage.py                                 # Punto de entrada de Django
 ├── cleanup_media.py                          # Limpieza de archivos temporales
 ├── docker-compose.yml                        # Orquestacion de contenedores
@@ -162,11 +163,13 @@ Backend/
 
 ### \textcolor{blue}{2. Interfaz Streamlit}
 
-La UI principal de la aplicacion. Es un contenedor ligero alrededor de la Capa de Servicio. **No** contiene logica de negocio.
+La UI principal de la aplicacion. Es un cliente HTTP puro de la API Django (`requests`). **No** contiene logica de negocio ni importa codigo Django.
 
-- **Llamada Directa a Servicio**: Importa los Servicios directamente (comparten el mismo contenedor/codigo base)
-- **Gestion de Estado**: Usa `st.session_state` para persistir resultados
-- **Manejo de Errores**: Captura excepciones personalizadas para mensajes amigables
+- **Cliente HTTP**: Llama a `POST /login/`, `POST /generate-report/` y `POST /logout/` guardando la cookie de sesion. URL del backend con `BACKEND_URL` (default `http://localhost:8000`; `http://backend:8000` en Docker Compose).
+- **Seguridad heredada**: Al pasar por la API, el uso via Streamlit queda cubierto por autenticacion y throttling DRF.
+- **Gestion de Estado**: Usa `st.session_state` para sesion y resultados
+- **Descargas**: Video/audio desde las `video_url`/`audio_url` de la respuesta; PDF generado localmente con `fpdf2`
+- **Manejo de Errores**: Traduce `401`/`429`/`400`/`500` a mensajes amigables
 
 ### \textcolor{blue}{3. API REST}
 
