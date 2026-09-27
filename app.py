@@ -9,6 +9,7 @@ django_setup.setup()
 
 import streamlit as st
 from django.conf import settings
+from django.contrib.auth import authenticate
 import environ
 
 from translation_generator_app.models import translationPost
@@ -193,12 +194,57 @@ def generate_report_pdf(report_text: str, title: str, youtube_url: str = "") -> 
         return bytes(out)
 
 
+def _require_login() -> bool:
+    """
+    Show a login screen until the user authenticates with a Django user.
+
+    Returns:
+        True if the user is authenticated, False otherwise.
+    """
+    if st.session_state.get('authenticated_user'):
+        return True
+
+    st.title("YouTube Agent")
+    st.write("Inicia sesión con tu usuario para continuar.")
+
+    with st.form("login_form"):
+        username = st.text_input("Usuario")
+        password = st.text_input("Contraseña", type="password")
+        submitted = st.form_submit_button("Iniciar sesión")
+
+    if submitted:
+        if not username or not password:
+            st.error("Ingresa usuario y contraseña.")
+        else:
+            user = authenticate(username=username, password=password)
+            if user is None:
+                st.error("Credenciales inválidas.")
+                logger.warning(f"Failed Streamlit login attempt for username: {username}")
+            elif not user.is_active:
+                st.error("La cuenta de usuario está deshabilitada.")
+            else:
+                st.session_state.authenticated_user = user.username
+                logger.info(f"Streamlit login: {username}")
+                st.rerun()
+
+    return False
+
+
 def main():
+    if not _require_login():
+        return
+
     st.title("YouTube Agent")
     st.write("Analiza videos de YouTube y obtén un Reporte de Contenido detallado. Transcribe y analiza lo que se dice en tus videos favoritos de YouTube.")
 
     with st.sidebar:
         st.header("Configuration")
+        st.write(f"Sesión: **{st.session_state.authenticated_user}**")
+        if st.button("Cerrar sesión"):
+            logger.info(f"Streamlit logout: {st.session_state.authenticated_user}")
+            for key in ('authenticated_user', 'result'):
+                st.session_state.pop(key, None)
+            st.rerun()
         gemini_api_key = st.text_input("Gemini API Key", type="password")
         st.info("This app uses Google Gemini models to analyze the video content. Please ensure your API key has access to `gemini-3.5-flash`.")
 
