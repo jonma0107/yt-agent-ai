@@ -34,20 +34,20 @@ Este documento profundiza en los componentes auxiliares del sistema, la estrateg
 La lógica de negocio se ha desacoplado completamente de las Vistas (Views) para seguir el **Principio de Responsabilidad Única (SRP)**.
 
 ### ¿Por qué modularizar?
-En versiones anteriores, una sola función gigante hacía todo: descargaba, transcribía y traducía. Esto era difícil de leer, probar y mantener.
+En versiones anteriores, una sola función gigante hacía todo: descargaba, transcribía y analizaba. Esto era difícil de leer, probar y mantener.
 
 ### Estructura Actual:
 1.  **`youtube_service.py`**:
-    *   **Responsabilidad:** Solo interactúa con `yt-dlp`.
-    *   **Detalle:** Maneja headers anti-bot, descarga física de archivos y sanitización de nombres. No sabe nada de IA.
+    *   **Responsabilidad**: Solo interactúa con `yt-dlp`.
+    *   **Detalle**: Maneja headers anti-bot, descarga física de archivos y sanitización de nombres. No sabe nada de IA.
 2.  **`transcription_service.py`**:
-    *   **Responsabilidad:** Solo interactúa con AssemblyAI.
-    *   **Detalle:** Sube el audio y devuelve texto crudo. No sabe de dónde vino el audio ni para qué se usará.
-3.  **`translation_service.py`**:
-    *   **Responsabilidad:** Solo interactúa con OpenAI y lógica de texto.
-    *   **Detalle:** Detecta idiomas y decide si traducir o solo formatear. Es pura manipulación de texto.
+    *   **Responsabilidad**: Solo interactúa con AssemblyAI.
+    *   **Detalle**: Sube el audio y devuelve texto crudo. No sabe de dónde vino el audio ni para qué se usará.
+3.  **`analysis_service.py`**:
+    *   **Responsabilidad**: Solo interactúa con Google Gemini.
+    *   **Detalle**: Genera un Reporte de Contenido estructurado a partir de la transcripción. Es pura manipulación de texto con IA.
 
-**Beneficio:** Si mañana queremos cambiar AssemblyAI por Whisper, solo tocamos `transcription_service.py`. El resto del sistema ni se entera.
+**Beneficio**: Si mañana queremos cambiar AssemblyAI por Whisper, solo tocamos `transcription_service.py`. Si queremos cambiar Gemini por otro LLM, solo tocamos `analysis_service.py`. El resto del sistema ni se entera.
 
 ---
 
@@ -55,9 +55,11 @@ En versiones anteriores, una sola función gigante hacía todo: descargaba, tran
 
 Se implementó una jerarquía de excepciones personalizada para dejar de usar respuestas genéricas como "Error 500".
 
-*   **`YouTubeDownloadException`**: "No pudimos descargar el video (quizás es privado)".
-*   **`TranscriptionException`**: "Falló el servicio de voz a texto".
-*   **`TranslationException`**: "OpenAI no respondió o falló la API key".
+*   **`TranslationGeneratorException`** (Base)
+    *   `YouTubeDownloadException`: "No pudimos descargar el video (quizás es privado)".
+    *   `TranscriptionException`: "Falló el servicio de voz a texto".
+    *   `AnalysisException`: "Gemini no respondió o falló la API key".
+    *   `InvalidDataException`: "Datos de entrada inválidos".
 
 Esto permite que la UI (Streamlit) muestre mensajes **específicos y accionables** al usuario, en lugar de un "Algo salió mal" genérico.
 
@@ -67,18 +69,18 @@ Esto permite que la UI (Streamlit) muestre mensajes **específicos y accionables
 
 ### ¿Por qué es necesaria?
 Aunque la app parece procesar en tiempo real y mostrar el resultado, necesitamos persistencia para:
-1.  **Historial y Auditoría:** Saber qué videos se han procesado.
-2.  **Análisis:** Entender qué canciones o idiomas son populares.
-3.  **Depuración:** Si algo falla, el registro en BD puede ayudar (aunque actualmente guardamos al final del éxito).
+1.  **Historial y Auditoría**: Saber qué videos se han procesado.
+2.  **Análisis**: Entender qué videos o tipos de contenido son populares.
+3.  **Depuración**: Si algo falla, el registro en BD puede ayudar (aunque actualmente guardamos al final del éxito).
 
 ### Modelo `translationPost`
 *   **`youtube_title`**: Título del video.
 *   **`youtube_link`**: URL original.
-*   **`generated_content`**: El resultado final (traducido/formateado).
+*   **`generated_content`**: El Reporte de Contenido generado.
 *   **`created_at`**: Fecha de procesamiento.
 
 ### Ciclo de Vida del Dato
-1.  El usuario solicita una canción en Streamlit.
+1.  El usuario solicita un análisis en Streamlit.
 2.  Los servicios procesan todo en memoria/archivos temporales.
-3.  **Solo al final**, si todo fue exitoso, el orquestador (en `app.py`) crea una entrada en `translationPost`.
-4.  Actualmente, estos datos son de **escritura** (Logging/History). La aplicación no lee estos datos para mostrarlos al usuario (no hay un "feed" de traducciones anteriores), pero la arquitectura está lista para esa funcionalidad si se necesitara.
+3.  **Solo al final**, si todo fue exitoso, el orquestador crea una entrada en `translationPost`.
+4.  Actualmente, estos datos son de **escritura** (Logging/History). La aplicación no lee estos datos para mostrarlos al usuario (no hay un "feed" de análisis anteriores), pero la arquitectura está lista para esa funcionalidad si se necesitara.

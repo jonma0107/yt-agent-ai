@@ -6,7 +6,6 @@
 - [Estructura de Directorios](#estructura-de-directorios)
 - [Componentes Principales](#componentes-principales)
 - [Flujo de Ejecución](#flujo-de-ejecución)
-- [Soporte Multiidioma](#soporte-multiidioma)
 - [Referencia API](#referencia-api)
 
 ## 📖 Descripción General
@@ -14,7 +13,7 @@
 El backend de **YT-AGENT-AI** está construido utilizando un enfoque de **Clean Architecture**, asegurando separación de responsabilidades, testabilidad y mantenibilidad. La lógica central está desacoplada del framework (Django) y de la UI (Streamlit), residiendo en **Servicios** dedicados.
 
 Principios arquitectónicos clave:
-*   **Capa de Servicios**: Encapsula la lógica de negocio (descarga de YouTube, Transcripción, Traducción).
+*   **Capa de Servicios**: Encapsula la lógica de negocio (descarga de YouTube, Transcripción, Análisis de Contenido).
 *   **Vistas Basadas en Clases (CBV)**: Maneja las solicitudes HTTP y el formato de respuesta.
 *   **Excepciones Personalizadas**: Proporciona manejo de errores granular.
 *   **Principios SOLID**: Aplicados en todo el código base.
@@ -43,7 +42,7 @@ graph TD
         Orchestrator[Orquestación de Servicios]
         YT[YouTubeService]
         AI_Trans[TranscriptionService - AssemblyAI]
-        AI_Transl[TranslationService - OpenAI]
+        AI_An[AnalysisService - Gemini]
     end
     
     Orchestrator --> YT
@@ -52,8 +51,8 @@ graph TD
     Orchestrator --> AI_Trans
     AI_Trans --> Text[Transcripción Cruda]
     
-    Orchestrator --> AI_Transl
-    AI_Transl --> Final[Texto Formateado y Traducido]
+    Orchestrator --> AI_An
+    AI_An --> Report[Reporte de Contenido]
     
     subgraph "Capa de Datos"
         DB[(PostgreSQL)]
@@ -71,7 +70,7 @@ Backend/
 │   │   ├── __init__.py
 │   │   ├── youtube_service.py    # contenedor (wrapper) de yt-dlp
 │   │   ├── transcription_service.py  # integración con AssemblyAI
-│   │   └── translation_service.py    # integración con OpenAI
+│   │   └── analysis_service.py   # integración con Google Gemini
 │   │
 │   ├── exceptions.py             # Jerarquía de Excepciones Personalizadas
 │   ├── models.py                 # Modelos de base de datos
@@ -98,11 +97,14 @@ Backend/
     *   Solicita la transcripción.
     *   Sondea (poll) hasta que se completa.
 
-*   **`TranslationService`**: Interactúa con OpenAI (GPT-4o/Turbo).
-    *   **Detección de Idioma**: Detecta automáticamente el idioma de origen.
-    *   **Traducción Inteligente**: 
-        *   Si `origen == destino`: Formatea el texto en versos/estrofas.
-        *   Si `origen != destino`: Formatea Y traduce preservando el significado/rima.
+*   **`AnalysisService`**: Interactúa con Google Gemini.
+    *   **Generación de Reporte de Contenido**: Analiza la transcripción completa y genera un reporte estructurado con 5 secciones:
+        *   Temas principales tratados
+        *   Argumento / resumen narrativo
+        *   Opiniones o puntos de vista expresados
+        *   Datos o hechos clave
+        *   Conclusión / veredicto final
+    *   Utiliza el modelo `gemini-3.5-flash` con `temperature=0.7`.
 
 ### 2. Interfaz Streamlit (`app.py`)
 
@@ -117,62 +119,38 @@ El frontend es un contenedor ligero alrededor de la Capa de Servicio. **No** con
 *   `TranslationGeneratorException` (Base)
     *   `YouTubeDownloadException`
     *   `TranscriptionException`
-    *   `TranslationException`
+    *   `AnalysisException`
     *   `InvalidDataException`
 
 ## 🔄 Flujo de Ejecución
 
-1.  **Entrada**: El usuario proporciona URL de YouTube y API Key de OpenAI.
+1.  **Entrada**: El usuario proporciona URL de YouTube y API Key de Gemini.
 2.  **Descarga**: `YouTubeService` descarga medios a `media/`.
 3.  **Transcripción**: `TranscriptionService` envía audio a AssemblyAI y obtiene texto.
-4.  **Procesamiento**: `TranslationService` analiza el texto:
-    *   Detecta idioma (e.g., 'en').
-    *   Compara con destino (e.g., 'es').
-    *   Genera la salida final.
+4.  **Análisis**: `AnalysisService` envía la transcripción a Gemini y genera un Reporte de Contenido estructurado.
 5.  **Persistencia**: resultado guardado en PostgreSQL vía Django ORM.
 6.  **Visualización**: Resultados mostrados en UI con botones de descarga.
-
-## 🌍 Soporte Multiidioma
-
-El sistema actualmente soporta **11 idiomas** con capacidades completas de detección y traducción.
-
-| Código | Idioma | Nombre Nativo |
-|--------|----------|-------------|
-| `es` | Español | Español |
-| `en` | Inglés | English |
-| `fr` | Francés | Français |
-| `de` | Alemán | Deutsch |
-| `it` | Italiano | Italiano |
-| `pt` | Portugués | Português |
-| `ru` | Ruso | Русский |
-| `ja` | Japonés | 日本語 |
-| `ko` | Coreano | 한국어 |
-| `zh` | Chino | 中文 |
-| `ar` | Árabe | العربية |
 
 ## 📚 Referencia API
 
 Aunque la app Streamlit es la interfaz principal, el backend expone un endpoint REST:
 
-**Endpoint:** `POST /api/generate-translation/`
+**Endpoint:** `POST /api/generate-report/`
 
 **Payload:**
 ```json
 {
     "link": "https://youtube.com/watch?v=...",
-    "openai_api_key": "sk-...",
-    "target_language": "fr" 
+    "gemini_api_key": "AI..."
 }
 ```
 
 **Respuesta:**
 ```json
 {
-    "content": "Texto traducido...",
+    "report": "Reporte de contenido...",
     "title": "Título del Video",
     "original_transcription": "Texto original...",
-    "video_file": "/ruta/al/video.mp4",
-    "audio_file": "/ruta/al/audio.mp3",
-    "target_language": "fr"
+    "transcription_file": "/ruta/al/transcript.txt"
 }
 ```
