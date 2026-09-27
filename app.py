@@ -27,7 +27,8 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 env = environ.Env()
 environ.Env.read_env()
-GEMINI_API_KEY = env('GEMINI_API_KEY')
+# Nota: la API key de Gemini la provee cada usuario en el sidebar de Streamlit
+# (parametro gemini_api_key), no se lee del entorno.
 AAI_API_KEY = env('AAI_API_KEY')
 
 

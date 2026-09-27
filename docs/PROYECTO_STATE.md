@@ -242,8 +242,9 @@ El archivo `.env` contiene las siguientes variables:
 
 ```ini
 # API Keys
-AAI_API_KEY="..."          # AssemblyAI - para transcripcion
-GEMINI_API_KEY="..."       # Google Gemini - para analisis
+AAI_API_KEY="..."          # AssemblyAI - para transcripcion (servidor)
+# NOTA: la API key de Google Gemini NO va en el .env.
+# Cada usuario la ingresa en el sidebar de Streamlit o en el payload REST (gemini_api_key).
 
 # Base de Datos (Neon Cloud PostgreSQL)
 DB_NAME=neondb
@@ -326,7 +327,7 @@ El script `cleanup_media.py` elimina archivos temporales (.mp4, .mp3, .txt) mayo
 - [x] AnalysisService importa correctamente en contenedor backend
 - [x] AnalysisService importa correctamente en contenedor frontend
 - [x] google-generativeai==0.8.4 instalado y funcionando
-- [x] GEMINI_API_KEY configurado en .env
+- [x] GEMINI_API_KEY provista por el usuario en Streamlit/REST (no va en .env)
 - [x] Endpoint /api/generate-report/ disponible
 - [x] Streamlit UI actualizada con UI de Reporte de Contenido
 - [x] translation_service.py eliminado

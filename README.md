@@ -48,7 +48,6 @@ La forma más fácil de ejecutar la aplicación es usando **Docker Compose**.
      Actualiza `.env` con tus credenciales:
      ```ini
      AAI_API_KEY=tu_api_key_assemblyai
-     GEMINI_API_KEY=tu_api_key_gemini
      SECRET_KEY=tu_secret_key_django
      DEBUG=True
      DB_NAME=postgres
@@ -56,6 +55,11 @@ La forma más fácil de ejecutar la aplicación es usando **Docker Compose**.
      DB_PASS=postgres
      DB_HOST=db
      ```
+
+     > **API Keys:** la clave de AssemblyAI (`AAI_API_KEY`) vive en el servidor vía `.env`
+     > porque la transcripción nunca la pide al usuario. En cambio, la clave de Google Gemini
+     > **no** va en el `.env`: cada usuario la ingresa en el sidebar de Streamlit
+     > (campo "Gemini API Key") o la envía en el payload del endpoint REST (`gemini_api_key`).
 
 3.  **Ejecutar con Docker Compose:**
 
