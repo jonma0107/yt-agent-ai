@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'translation_generator_app',
 ]
 
@@ -59,6 +60,22 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'ai_translation.urls'
+
+# Django REST Framework — capa de seguridad: throttling por alcance.
+# Cada vista declara su `throttle_scope` y aquí se define el límite.
+# Formato: '<n>/<periodo>' donde periodo es: s(econd), m(inute), h(our), d(ay).
+# Ajustables por entorno sin tocar código.
+REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.ScopedRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        # Login: estricto, anti fuerza bruta (por IP si es anónimo)
+        'login': env('LOGIN_THROTTLE_RATE', default='5/min'),
+        # Reporte: operación costosa (descarga + IA), por usuario/IP
+        'report': env('REPORT_THROTTLE_RATE', default='10/hour'),
+    },
+}
 
 TEMPLATES = [
     {
