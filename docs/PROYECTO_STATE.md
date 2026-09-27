@@ -84,7 +84,7 @@ Ingresar una URL de YouTube → Descargar audio → Transcribir (AssemblyAI) →
 | Backend Framework | Django | 4.1 |
 | Frontend | Streamlit | 1.33.0 |
 | Transcripcion | AssemblyAI | 0.36.0 |
-| Inteligencia Artificial | Google Gemini | gemini-3.5-flash |
+| Inteligencia Artificial | Google Gemini (cadena con fallback) | gemini-3.5-flash-lite (default) |
 | Descarga de Video | yt-dlp | 2025.9.26 |
 | Base de Datos | PostgreSQL | (Neon Cloud) |
 | Contenedorizacion | Docker + Docker Compose | 3.8 |
@@ -149,7 +149,7 @@ Backend/
 |----------|----------------|-------------|
 | `YouTubeService` | Extraccion de titulo y descarga de audio/video | yt-dlp |
 | `TranscriptionService` | Transcripcion de audio a texto | AssemblyAI |
-| `AnalysisService` | Generacion de Reporte de Contenido (5 secciones) | Google Gemini (gemini-3.5-flash) |
+| `AnalysisService` | Generacion de Reporte de Contenido (5 secciones) | Google Gemini (cadena de 12 modelos con fallback) |
 
 **AnalysisService** es el corazon del proyecto actual. Su metodo `generate_report(transcription_text)` recibe el texto transcrito y genera un reporte estructurado con:
 
@@ -221,7 +221,7 @@ Modelo `translationPost`:
 | Aspecto | Antes (Traduccion) | Ahora (Reporte de Contenido) |
 |---------|-------------------|------------------------------|
 | **Proposito** | Traducir letras de canciones | Analizar contenido de videos |
-| **IA** | OpenAI (GPT-4o/Turbo) | Google Gemini (gemini-3.5-flash) |
+| **IA** | OpenAI (GPT-4o/Turbo) | Google Gemini (cadena con fallback, default flash-lite) |
 | **Endpoint** | POST /api/generate-translation/ | POST /generate-report/ |
 | **Output** | Traduccion formateada en versos | Reporte de contenido (5 secciones) |
 | **Input adicional** | target_language | Sin parametro de idioma |
@@ -296,8 +296,8 @@ El script `cleanup_media.py` elimina archivos temporales (.mp4, .mp3, .txt) mayo
 
 ### \textcolor{blue}{Preguntas Frecuentes}
 
-- **Que modelo de Gemini se utiliza?**
-  Se utiliza `gemini-3.5-flash`, que ofrece buena capacidad de analisis con un contexto de 1M+ tokens y cuota suficiente para uso individual (2/5 RPM).
+- **Que modelo de Gemini se utiliza? Un solo modelo o varios?**
+  Se usan **varios en cadena con fallback automatico**, no uno solo. `PREFERRED_MODELS` tiene 12 modelos en 6 tiers ordenados por cuota restante (snapshot 2026-09-25): empieza en `gemini-3.5-flash-lite` (default, 500 RPD) y, si un modelo responde `429`/cuota agotada o `404`, `_try_with_fallback()` espera el `retry delay` y prueba el siguiente, hasta `gemma-4-26b`/`gemma-4-31b` (14.4K RPD) como ultimo recurso. Solo falla si se agotan todos.
 
 - **Por que no se usa OpenAI?**
   El proyecto fue migrado de OpenAI a Google Gemini para aprovechar el ecosistema Gemini y la variedad de modelos disponibles con capa gratuita.

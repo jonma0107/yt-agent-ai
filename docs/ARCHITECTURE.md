@@ -104,7 +104,8 @@ Backend/
         *   Opiniones o puntos de vista expresados
         *   Datos o hechos clave
         *   Conclusión / veredicto final
-    *   Utiliza el modelo `gemini-3.5-flash` con `temperature=0.7`.
+    *   **Cadena de modelos con fallback por cuota**: no usa un solo modelo. `PREFERRED_MODELS` (12 modelos en 6 tiers, ordenados por cuota restante) y `_try_with_fallback()` reintenta con el siguiente ante `429`/`quota`/`404`. Default: `gemini-3.5-flash-lite` (500 RPD); último recurso: `gemma-4-26b`/`gemma-4-31b` (14.4K RPD).
+    *   Usa `temperature=0.5`, chunks de 8000 caracteres (máx. 30000) y llamada única si el texto es corto, para ahorrar cuota.
 
 ### 2. Interfaz Streamlit (`app.py`)
 
