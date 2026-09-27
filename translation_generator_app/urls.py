@@ -1,11 +1,10 @@
 from django.urls import path
-from .views import TranslationGeneratorView, generate_translation
+from .views import ContentAnalysisView, generate_report
 
 
 urlpatterns = [
-    # Class-based view (recommended)
-    path('generate-translation/', TranslationGeneratorView.as_view(), name='generate-translation'),
+    path('generate-report/', ContentAnalysisView.as_view(), name='generate-report'),
     
     # Legacy function-based view (for backwards compatibility)
-    # path('generate-translation', generate_translation, name='generate-translation-legacy'),
+    # path('generate-report', generate_report, name='generate-report-legacy'),
 ]

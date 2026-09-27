@@ -1,9 +1,9 @@
 """
-Views package for translation generator app.
+Views package for content analysis app.
 """
-from .views_app import TranslationGeneratorView, generate_translation
+from .views_app import ContentAnalysisView, generate_report
 
 __all__ = [
-    'TranslationGeneratorView',
-    'generate_translation',
-] 
+    'ContentAnalysisView',
+    'generate_report',
+]
