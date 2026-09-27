@@ -35,7 +35,7 @@ class ContentAnalysisView(View):
     """
     Class-based view for processing YouTube videos: download, transcribe, and analyze.
     
-    Endpoint: POST /api/generate-report
+    Endpoint: POST /generate-report/ (requires login via POST /login/)
     
     Request Body:
         {
@@ -67,6 +67,12 @@ class ContentAnalysisView(View):
         Returns:
             JsonResponse with analysis result or error
         """
+        if not request.user.is_authenticated:
+            return JsonResponse(
+                {'error': 'Authentication required. Log in via POST /login/.'},
+                status=401
+            )
+
         try:
             data = self._parse_request_data(request)
             validated_data = TranslationRequestValidator.validate(data)
