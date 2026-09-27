@@ -533,16 +533,20 @@ section.card h2:first-child { margin-top: 0; }
   "report": "Reporte de contenido...",
   "title": "Título del Video",
   "original_transcription": "Texto original...",
-  "transcription_file": "/ruta/al/transcript.txt"
+  "transcription_file": "/ruta/al/transcript.txt",
+  "video_url": "/media/video.mp4",
+  "audio_url": "/media/audio.mp3"
 }</pre></div>
+      <p>Contrato: en <code>200</code> todos los campos están presentes (sin <code>null</code>). <code>video_url</code>/<code>audio_url</code> son rutas relativas a <code>{{base_url}}</code> servidas desde <code>/media/</code>.</p>
       <h3>Autenticación</h3>
+      <div class="callout c-info"><span class="lbl">URL base</span>Los ejemplos usan <code>{{base_url}}</code>. En local vale <code>http://localhost:8000</code>. Créala como variable <code>base_url</code> (Postman/entorno) y reutilízala en todas las llamadas.</div>
       <div class="endpoint"><span class="verb">POST</span><span>/login/</span></div>
       <div class="endpoint"><span class="verb">POST</span><span>/logout/</span></div>
-      <div class="code"><span class="lbl">bash — login con curl</span><pre>curl -c cookies.txt -X POST http://localhost:8000/login/ \
+      <div class="code"><span class="lbl">bash — login con curl</span><pre>curl -c cookies.txt -X POST "{{base_url}}/login/" \
   -H "Content-Type: application/json" \
   -d '{"username": "usuario", "password": "secreto"}'
 
-curl -b cookies.txt -X POST http://localhost:8000/generate-report/ \
+curl -b cookies.txt -X POST "{{base_url}}/generate-report/" \
   -H "Content-Type: application/json" \
   -d '{"link": "https://youtube.com/watch?v=...", "gemini_api_key": "AI..."}'</pre></div>
       <h3>Errores</h3>
@@ -557,13 +561,22 @@ curl -b cookies.txt -X POST http://localhost:8000/generate-report/ \
         </tbody>
       </table>
       <article class="err">
+        <header><span class="http h400">400</span> Payload inválido</header>
+        <div class="code"><pre>{ "error": "Invalid YouTube URL format" }</pre></div>
+      </article>
+      <article class="err">
         <header><span class="http h401">401</span> Sin autenticación</header>
         <div class="code"><pre>{ "error": "Authentication required. Log in via POST /login/." }</pre></div>
+      </article>
+      <article class="err">
+        <header><span class="http h401">401</span> Credenciales inválidas</header>
+        <div class="code"><pre>{ "error": "Invalid credentials" }</pre></div>
       </article>
       <article class="err">
         <header><span class="http h429">429</span> Throttling excedido</header>
         <div class="code"><pre>{ "detail": "Request was throttled. Expected available in 60 seconds." }</pre></div>
       </article>
+      <p>No hay códigos de negocio propios: solo HTTP + cuerpo estándar.</p>
     </section>
 
     <section class="card" id="seguridad">
@@ -650,7 +663,7 @@ docker compose restart backend frontend   # tras cambios de código</pre></div>
       </ol>
     </section>
 
-    <footer>TicSocial S. A. S. · YT-AGENT-AI · Backend · rama main</footer>
+    <footer>YT-AGENT-AI · Backend · rama main</footer>
   </main>
 </div>
 <script>

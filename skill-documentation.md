@@ -100,7 +100,7 @@ cd docs && google-chrome --headless --disable-gpu --no-sandbox --print-to-pdf="d
 
 ---
 title: "Migración de DAS a AWS Fargate + ECS"
-author: "TicSocial S. A. S."
+author: "Tu nombre o empresa"
 date: "2026"
 graphics: true
 header-includes: |
@@ -764,6 +764,41 @@ Puedes incluir enlaces a recursos externos, imágenes o videos para enriquecer l
 
 - Si mencionas un video en la solicitud o documentación, incluye el link en la sección correspondiente.
 
+### 11. Placeholder `{{base_url}}` para URLs base
+
+Nunca repitas la URL base literal en cada ejemplo. Define una vez el
+placeholder `{{base_url}}` y recomiéndalo como variable de entorno
+(Postman) o de configuración:
+
+- En los ejemplos usa siempre `{{base_url}}`:
+  `POST {{base_url}}/api/recurso/`, `curl "{{base_url}}/o/token/"`.
+- Documenta el valor real una sola vez (callout `c-info` de
+  "Producción"/"Entorno") y pide crearlo como variable `base_url`.
+- Si hay varios entornos (local, producción), lista cada valor junto a
+  su nombre de variable (`base_url_local`, `base_url_prod`).
+
+### 12. Contrato de respuesta explícito
+
+Todo endpoint documentado debe incluir, además del ejemplo de éxito:
+
+- La respuesta exacta con todos los campos del contrato.
+- Qué valor toman los campos no enviados (`null`, `""`, omisión).
+- La píldora HTTP correcta: `201` para creación, `200` para lectura,
+  token u operación sin creación (`h201`/`h200`).
+- Si la operación es masiva, declara la atomicidad: todo o nada
+  (si un elemento es inválido, no se crea ninguno) o parcial con
+  detalle por posición.
+
+### 13. Un bloque `.err` por error + declaración de códigos propios
+
+- Cada error va en su propio bloque `.err`: header con la píldora
+  `.http` correcta + `.code` con el cuerpo exacto de respuesta.
+- Cubre como mínimo: cuerpo vacío, validación de campos, `401` sin
+  credenciales / credenciales inválidas (son dos `.err` distintos) y
+  `405` si aplica.
+- Declara explícitamente si NO existen códigos de negocio propios
+  (ej.: "No hay códigos `ERR_*`; solo HTTP + cuerpo estándar").
+
 ---
 
 ## Checklist de verificación (no entregar sin esto)
@@ -778,3 +813,6 @@ Puedes incluir enlaces a recursos externos, imágenes o videos para enriquecer l
 - [ ] PDF pandoc generado (comando pandoc de la sección 5, ejecutado
   directo en terminal) sin errores de LaTeX.
 - [ ] Variante correcta: para cliente (sin registro) o interna (con registro).
+- [ ] URLs base con placeholder `{{base_url}}` + variable documentada;
+  contrato de respuesta con campos/`null`/píldora correcta; un `.err`
+  por error y declaración de códigos propios (o su ausencia).
