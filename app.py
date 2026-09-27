@@ -246,7 +246,7 @@ def main():
                 st.session_state.pop(key, None)
             st.rerun()
         gemini_api_key = st.text_input("Gemini API Key", type="password")
-        st.info("This app uses Google Gemini models to analyze the video content. Please ensure your API key has access to `gemini-3.5-flash`.")
+        st.info("This app uses Google Gemini models with automatic fallback. Please ensure your API key has access to the Flash models (e.g. `gemini-3.5-flash-lite`).")
 
         st.divider()
 

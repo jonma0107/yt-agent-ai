@@ -43,9 +43,11 @@ PREFERRED_MODELS = [
 
 
 class AnalysisService:
-    """Service for handling text analysis and content report generation."""
+    """
+    Service for handling text analysis and content report generation.
 
-    MODEL = 'gemini-3.5-flash-lite'
+    Uses PREFERRED_MODELS fallback chain (first entry is the default model).
+    """
 
     SINGLE_PROMPT = (
         "Analiza la siguiente transcripción completa de un video de YouTube y genera "
@@ -83,7 +85,6 @@ class AnalysisService:
     def __init__(self, api_key: str):
         genai.configure(api_key=api_key)
         self.api_key = api_key
-        self.model = genai.GenerativeModel(self.MODEL)
 
     def _try_with_fallback(self, prompt: str, max_tokens: int, timeout: int = 120) -> str:
         """Try generation with fallback models on quota/availability errors."""
