@@ -1,6 +1,30 @@
-# 🎵 YT-AGENT-AI
+# YT-AGENT-AI
 
-<img width="1528" height="783" alt="image" src="https://github.com/user-attachments/assets/359d58a4-ce58-4628-9142-6477742e1420.jpg" />
+<img width="1751" height="725" alt="image" src="https://github.com/user-attachments/assets/ee14b2a0-9208-4886-8543-ac45ee0b0cf4" />
+
+<img width="1760" height="744" alt="image" src="https://github.com/user-attachments/assets/d989c36b-1837-4268-9b3b-2c90d22ec9d5" />
+
+<img width="1358" height="933" alt="image" src="https://github.com/user-attachments/assets/1f0ec2c7-afc7-435e-a85f-3243e69c2a6a" />
+
+<img width="1358" height="933" alt="image" src="https://github.com/user-attachments/assets/487a3b07-71ce-4395-9923-da99b63b615c" />
+
+<img width="1788" height="741" alt="image" src="https://github.com/user-attachments/assets/9aaa02f7-dbac-4a9b-870b-ab79d8d38d09" />
+
+<img width="1726" height="700" alt="image" src="https://github.com/user-attachments/assets/7e9ffaf6-3a79-4f9b-9fcc-667632a5d95d" />
+
+<img width="1726" height="700" alt="image" src="https://github.com/user-attachments/assets/9762172c-be5e-47b2-b747-5c67c2ed3cf2" />
+
+<img width="1719" height="925" alt="image" src="https://github.com/user-attachments/assets/8d3996bd-9ce0-4625-90f9-2e7d22dfe803" />
+
+<img width="1719" height="925" alt="image" src="https://github.com/user-attachments/assets/b16ce2e3-5989-45be-9c5f-30f7aebff823" />
+
+<img width="1820" height="926" alt="image" src="https://github.com/user-attachments/assets/9326d266-6408-44c0-a77b-d79c9e61e005" />
+
+
+
+
+
+
 
 ## 📖 Descripción General
 
